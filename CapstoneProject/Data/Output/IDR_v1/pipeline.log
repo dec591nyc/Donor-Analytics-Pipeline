@@ -1,0 +1,361 @@
+2025-10-16 17:11:14,895 - donations_pipeline - INFO - [logger.py:93] - ================================================================================
+2025-10-16 17:11:14,895 - donations_pipeline - INFO - [logger.py:93] - Donations Analytics Pipeline - Starting
+2025-10-16 17:11:14,895 - donations_pipeline - INFO - [logger.py:93] - ================================================================================
+2025-10-16 17:11:14,896 - donations_pipeline - INFO - [logger.py:59] - Starting: [1/7] Data Loading
+2025-10-16 17:11:14,896 - donations_pipeline - INFO - [logger.py:93] - Loading data from CSV: C:\Users\zifue\Source\Repos\Python_dvl_env\Data\Input\FullDataTable.csv
+2025-10-16 17:11:15,031 - donations_pipeline - INFO - [logger.py:93] - Loaded 35,612 rows, 43 columns
+2025-10-16 17:11:15,061 - donations_pipeline - INFO - [logger.py:93] - ✓ All required columns present
+2025-10-16 17:11:15,062 - donations_pipeline - WARNING - [logger.py:97] - Amount: 903 negative values
+2025-10-16 17:11:15,062 - donations_pipeline - WARNING - [logger.py:97] - Amount: 7 zero values
+2025-10-16 17:11:15,062 - donations_pipeline - INFO - [logger.py:93] - ✓ Data quality checks passed (35,612 rows)
+2025-10-16 17:11:15,063 - donations_pipeline - INFO - [logger.py:93] - ✓ Date range: 1899-12-31 to 2025-08-11 (125.6 years)
+2025-10-16 17:11:15,063 - donations_pipeline - WARNING - [logger.py:97] - Date range exceeds 50 years - verify data
+2025-10-16 17:11:15,086 - donations_pipeline - WARNING - [logger.py:97] - Relationship flag issues detected:
+  - PastParent: 12 invalid values
+2025-10-16 17:11:15,086 - donations_pipeline - INFO - [logger.py:70] - Completed: [1/7] Data Loading (0.19s)
+2025-10-16 17:11:15,086 - donations_pipeline - INFO - [logger.py:59] - Starting: [2/7] Data Preprocessing
+2025-10-16 17:11:15,086 - donations_pipeline - INFO - [logger.py:93] - Starting data preprocessing
+2025-10-16 17:11:15,178 - donations_pipeline - WARNING - [logger.py:97] - PastParent: Found 12 rows with invalid values
+2025-10-16 17:11:15,205 - donations_pipeline - INFO - [logger.py:93] - Exported 12 relationship flag anomalies to: C:\Users\zifue\Source\Repos\Python_dvl_env\Data\Output\IDR_v1\relationship_flag_anomalies.csv
+2025-10-16 17:11:15,357 - donations_pipeline - INFO - [logger.py:93] - Removed 910 rows with non-positive amounts
+2025-10-16 17:11:15,361 - donations_pipeline - INFO - [logger.py:93] - Preprocessing complete: 35,612 → 34,702 rows (43 → 46 columns)
+2025-10-16 17:11:15,589 - donations_pipeline - INFO - [logger.py:93] - Cleaned data exported: C:\Users\zifue\Source\Repos\Python_dvl_env\Data\Output\IDR_v1\cleaned_donations.csv
+2025-10-16 17:11:15,589 - donations_pipeline - INFO - [logger.py:70] - Completed: [2/7] Data Preprocessing (0.50s)
+2025-10-16 17:11:15,590 - donations_pipeline - INFO - [logger.py:93] - Ensuring sklearn compatibility (converting pd.NA)...
+2025-10-16 17:11:15,976 - donations_pipeline - INFO - [logger.py:93] - Conversion complete
+2025-10-16 17:11:15,988 - donations_pipeline - INFO - [logger.py:93] - 
+================================================================================
+2025-10-16 17:11:15,989 - donations_pipeline - INFO - [logger.py:93] - Analyzing: Since 2000
+2025-10-16 17:11:15,989 - donations_pipeline - INFO - [logger.py:93] - ================================================================================
+2025-10-16 17:11:15,990 - donations_pipeline - INFO - [logger.py:59] - Starting: [3/7] Basic Data Analytics - since_2000
+2025-10-16 17:11:16,012 - donations_pipeline - INFO - [logger.py:93] - Yearly trend: 26 years, total $21,376,073
+2025-10-16 17:11:16,039 - donations_pipeline - INFO - [logger.py:93] - Monthly trend: 303 months
+2025-10-16 17:11:16,194 - donations_pipeline - INFO - [logger.py:93] - Appeal analysis: 182 appeals, top: 2021MG
+2025-10-16 17:11:16,202 - donations_pipeline - INFO - [logger.py:93] - Fund analysis: 7 funds, top: BF
+2025-10-16 17:11:16,202 - donations_pipeline - INFO - [logger.py:93] - Generated 8 descriptive reports
+2025-10-16 17:11:16,214 - donations_pipeline - INFO - [logger.py:59] - Starting: RFM Computation
+2025-10-16 17:11:16,231 - donations_pipeline - INFO - [logger.py:93] - Using computed reference date: 2025-08-12
+2025-10-16 17:11:16,668 - donations_pipeline - INFO - [logger.py:93] - RFM Segment distribution:
+2025-10-16 17:11:16,669 - donations_pipeline - INFO - [logger.py:93] -   Regular: 2,341 (55.2%)
+2025-10-16 17:11:16,669 - donations_pipeline - INFO - [logger.py:93] -   At Risk / Lapsed: 903 (21.3%)
+2025-10-16 17:11:16,670 - donations_pipeline - INFO - [logger.py:93] -   Champion: 682 (16.1%)
+2025-10-16 17:11:16,670 - donations_pipeline - INFO - [logger.py:93] -   Loyal: 170 (4.0%)
+2025-10-16 17:11:16,670 - donations_pipeline - INFO - [logger.py:93] -   High Potential: 148 (3.5%)
+2025-10-16 17:11:16,670 - donations_pipeline - INFO - [logger.py:93] - RFM computed for 4,244 donors
+2025-10-16 17:11:16,670 - donations_pipeline - INFO - [logger.py:70] - Completed: RFM Computation (0.46s)
+2025-10-16 17:11:16,687 - donations_pipeline - INFO - [logger.py:93] - Identified 2,650 lapsed donors (>730 days, ≥$200 lifetime)
+2025-10-16 17:11:16,703 - donations_pipeline - INFO - [logger.py:93] - Relationship summary: 17 unique combinations
+2025-10-16 17:11:16,715 - donations_pipeline - INFO - [logger.py:70] - Completed: [3/7] Basic Data Analytics - since_2000 (0.72s)
+2025-10-16 17:11:16,715 - donations_pipeline - INFO - [logger.py:59] - Starting: [4/7] Predictive Analytics - since_2000
+2025-10-16 17:11:16,716 - donations_pipeline - INFO - [logger.py:59] - Starting: Training Re-donation Propensity Models
+2025-10-16 17:11:16,717 - donations_pipeline - INFO - [logger.py:93] - Building re-donation panel: 47 cutoffs
+2025-10-16 17:11:28,087 - donations_pipeline - INFO - [logger.py:93] - Panel created: 115,872 observations, 19,541 positive labels (16.9%)
+2025-10-16 17:11:28,223 - donations_pipeline - INFO - [logger.py:93] - Time-based split: train=95,985 (82.8%), test=19,887 (17.2%)
+2025-10-16 17:11:28,377 - donations_pipeline - INFO - [logger.py:59] - Starting: Training LogisticRegression
+2025-10-16 17:11:28,377 - donations_pipeline - INFO - [logger.py:93] - [LogisticRegression] Building pipeline...
+2025-10-16 17:11:28,377 - donations_pipeline - INFO - [logger.py:93] - [LogisticRegression] Starting model fitting (this is the main training step)...
+2025-10-16 17:11:50,683 - donations_pipeline - INFO - [logger.py:93] - [LogisticRegression] Model fitting complete.
+2025-10-16 17:11:50,683 - donations_pipeline - INFO - [logger.py:93] - [LogisticRegression] Starting model evaluation on test data...
+2025-10-16 17:11:50,824 - donations_pipeline - INFO - [logger.py:93] - LogisticRegression: AUC=0.911, F1=0.841
+2025-10-16 17:11:50,825 - donations_pipeline - INFO - [logger.py:93] - [LogisticRegression] Model evaluation complete.
+2025-10-16 17:11:50,825 - donations_pipeline - INFO - [logger.py:93] - [LogisticRegression] Storing results and saving model artifacts to disk...
+2025-10-16 17:11:50,830 - donations_pipeline - INFO - [logger.py:93] - Model saved: C:\Users\zifue\Source\Repos\Python_dvl_env\Data\Output\IDR_v1\since_2000\propensity_LogisticRegression_model.pkl
+2025-10-16 17:11:50,832 - donations_pipeline - INFO - [logger.py:93] - [LogisticRegression] Artifacts saved successfully.
+2025-10-16 17:11:50,833 - donations_pipeline - INFO - [logger.py:70] - Completed: Training LogisticRegression (22.46s)
+2025-10-16 17:11:50,833 - donations_pipeline - INFO - [logger.py:59] - Starting: Training RandomForest
+2025-10-16 17:11:50,833 - donations_pipeline - INFO - [logger.py:93] - [RandomForest] Building pipeline...
+2025-10-16 17:11:50,833 - donations_pipeline - INFO - [logger.py:93] - [RandomForest] Starting model fitting (this is the main training step)...
+2025-10-16 17:13:03,050 - donations_pipeline - INFO - [logger.py:93] - [RandomForest] Model fitting complete.
+2025-10-16 17:13:03,051 - donations_pipeline - INFO - [logger.py:93] - [RandomForest] Starting model evaluation on test data...
+2025-10-16 17:13:03,806 - donations_pipeline - INFO - [logger.py:93] - RandomForest: AUC=0.916, F1=0.930
+2025-10-16 17:13:03,806 - donations_pipeline - INFO - [logger.py:93] - [RandomForest] Model evaluation complete.
+2025-10-16 17:13:03,806 - donations_pipeline - INFO - [logger.py:93] - [RandomForest] Storing results and saving model artifacts to disk...
+2025-10-16 17:13:04,432 - donations_pipeline - INFO - [logger.py:93] - Model saved: C:\Users\zifue\Source\Repos\Python_dvl_env\Data\Output\IDR_v1\since_2000\propensity_RandomForest_model.pkl
+2025-10-16 17:13:04,434 - donations_pipeline - INFO - [logger.py:93] - [RandomForest] Artifacts saved successfully.
+2025-10-16 17:13:04,434 - donations_pipeline - INFO - [logger.py:70] - Completed: Training RandomForest (73.60s)
+2025-10-16 17:13:04,434 - donations_pipeline - INFO - [logger.py:59] - Starting: Training LightGBM
+2025-10-16 17:13:04,434 - donations_pipeline - INFO - [logger.py:93] - [LightGBM] Building pipeline...
+2025-10-16 17:13:04,434 - donations_pipeline - INFO - [logger.py:93] - [LightGBM] Starting model fitting (this is the main training step)...
+2025-10-16 17:13:08,349 - donations_pipeline - INFO - [logger.py:93] - [LightGBM] Model fitting complete.
+2025-10-16 17:13:08,350 - donations_pipeline - INFO - [logger.py:93] - [LightGBM] Starting model evaluation on test data...
+2025-10-16 17:13:08,610 - donations_pipeline - INFO - [logger.py:93] - LightGBM: AUC=0.921, F1=0.887
+2025-10-16 17:13:08,610 - donations_pipeline - INFO - [logger.py:93] - [LightGBM] Model evaluation complete.
+2025-10-16 17:13:08,610 - donations_pipeline - INFO - [logger.py:93] - [LightGBM] Storing results and saving model artifacts to disk...
+2025-10-16 17:13:08,635 - donations_pipeline - INFO - [logger.py:93] - Model saved: C:\Users\zifue\Source\Repos\Python_dvl_env\Data\Output\IDR_v1\since_2000\propensity_LightGBM_model.pkl
+2025-10-16 17:13:08,637 - donations_pipeline - INFO - [logger.py:93] - [LightGBM] Artifacts saved successfully.
+2025-10-16 17:13:08,637 - donations_pipeline - INFO - [logger.py:70] - Completed: Training LightGBM (4.20s)
+2025-10-16 17:13:08,841 - donations_pipeline - INFO - [logger.py:93] - Feature importance exported: C:\Users\zifue\Source\Repos\Python_dvl_env\Data\Output\IDR_v1\since_2000\field_importance_propensity_RandomForest.csv
+2025-10-16 17:13:08,847 - donations_pipeline - INFO - [logger.py:93] - Feature importance exported: C:\Users\zifue\Source\Repos\Python_dvl_env\Data\Output\IDR_v1\since_2000\field_importance_propensity_LightGBM.csv
+2025-10-16 17:13:08,848 - donations_pipeline - INFO - [logger.py:70] - Completed: Training Re-donation Propensity Models (112.13s)
+2025-10-16 17:13:08,908 - donations_pipeline - INFO - [logger.py:59] - Starting: Training Major Gift Propensity Models
+2025-10-16 17:13:08,910 - donations_pipeline - INFO - [logger.py:93] - Building major gift panel: 47 cutoffs, threshold=$1,000
+2025-10-16 17:13:22,180 - donations_pipeline - INFO - [logger.py:93] - Major gift panel: 115,872 observations, 2,341 major gifts (2.0%)
+2025-10-16 17:13:22,319 - donations_pipeline - INFO - [logger.py:93] - Time-based split: train=95,985 (82.8%), test=19,887 (17.2%)
+2025-10-16 17:13:22,319 - donations_pipeline - INFO - [logger.py:59] - Starting: Training LogisticRegression
+2025-10-16 17:13:22,321 - donations_pipeline - INFO - [logger.py:93] - [LogisticRegression] Building pipeline...
+2025-10-16 17:13:22,321 - donations_pipeline - INFO - [logger.py:93] - [LogisticRegression] Starting model fitting (this is the main training step)...
+2025-10-16 17:13:44,904 - donations_pipeline - INFO - [logger.py:93] - [LogisticRegression] Model fitting complete.
+2025-10-16 17:13:44,904 - donations_pipeline - INFO - [logger.py:93] - [LogisticRegression] Starting model evaluation on test data...
+2025-10-16 17:13:45,051 - donations_pipeline - INFO - [logger.py:93] - LogisticRegression: AUC=0.906, F1=0.930
+2025-10-16 17:13:45,051 - donations_pipeline - INFO - [logger.py:93] - [LogisticRegression] Model evaluation complete.
+2025-10-16 17:13:45,052 - donations_pipeline - INFO - [logger.py:93] - [LogisticRegression] Storing results and saving model artifacts to disk...
+2025-10-16 17:13:45,057 - donations_pipeline - INFO - [logger.py:93] - Model saved: C:\Users\zifue\Source\Repos\Python_dvl_env\Data\Output\IDR_v1\since_2000\propensity_LogisticRegression_model.pkl
+2025-10-16 17:13:45,058 - donations_pipeline - INFO - [logger.py:93] - [LogisticRegression] Artifacts saved successfully.
+2025-10-16 17:13:45,058 - donations_pipeline - INFO - [logger.py:70] - Completed: Training LogisticRegression (22.74s)
+2025-10-16 17:13:45,058 - donations_pipeline - INFO - [logger.py:59] - Starting: Training RandomForest
+2025-10-16 17:13:45,059 - donations_pipeline - INFO - [logger.py:93] - [RandomForest] Building pipeline...
+2025-10-16 17:13:45,059 - donations_pipeline - INFO - [logger.py:93] - [RandomForest] Starting model fitting (this is the main training step)...
+2025-10-16 17:14:02,673 - donations_pipeline - INFO - [logger.py:93] - [RandomForest] Model fitting complete.
+2025-10-16 17:14:02,674 - donations_pipeline - INFO - [logger.py:93] - [RandomForest] Starting model evaluation on test data...
+2025-10-16 17:14:03,227 - donations_pipeline - INFO - [logger.py:93] - RandomForest: AUC=0.923, F1=0.985
+2025-10-16 17:14:03,228 - donations_pipeline - INFO - [logger.py:93] - [RandomForest] Model evaluation complete.
+2025-10-16 17:14:03,229 - donations_pipeline - INFO - [logger.py:93] - [RandomForest] Storing results and saving model artifacts to disk...
+2025-10-16 17:14:03,532 - donations_pipeline - INFO - [logger.py:93] - Model saved: C:\Users\zifue\Source\Repos\Python_dvl_env\Data\Output\IDR_v1\since_2000\propensity_RandomForest_model.pkl
+2025-10-16 17:14:03,533 - donations_pipeline - INFO - [logger.py:93] - [RandomForest] Artifacts saved successfully.
+2025-10-16 17:14:03,533 - donations_pipeline - INFO - [logger.py:70] - Completed: Training RandomForest (18.48s)
+2025-10-16 17:14:03,533 - donations_pipeline - INFO - [logger.py:59] - Starting: Training LightGBM
+2025-10-16 17:14:03,533 - donations_pipeline - INFO - [logger.py:93] - [LightGBM] Building pipeline...
+2025-10-16 17:14:03,533 - donations_pipeline - INFO - [logger.py:93] - [LightGBM] Starting model fitting (this is the main training step)...
+2025-10-16 17:14:04,577 - donations_pipeline - INFO - [logger.py:93] - [LightGBM] Model fitting complete.
+2025-10-16 17:14:04,577 - donations_pipeline - INFO - [logger.py:93] - [LightGBM] Starting model evaluation on test data...
+2025-10-16 17:14:04,847 - donations_pipeline - INFO - [logger.py:93] - LightGBM: AUC=0.938, F1=0.957
+2025-10-16 17:14:04,848 - donations_pipeline - INFO - [logger.py:93] - [LightGBM] Model evaluation complete.
+2025-10-16 17:14:04,848 - donations_pipeline - INFO - [logger.py:93] - [LightGBM] Storing results and saving model artifacts to disk...
+2025-10-16 17:14:04,874 - donations_pipeline - INFO - [logger.py:93] - Model saved: C:\Users\zifue\Source\Repos\Python_dvl_env\Data\Output\IDR_v1\since_2000\propensity_LightGBM_model.pkl
+2025-10-16 17:14:04,876 - donations_pipeline - INFO - [logger.py:93] - [LightGBM] Artifacts saved successfully.
+2025-10-16 17:14:04,876 - donations_pipeline - INFO - [logger.py:70] - Completed: Training LightGBM (1.34s)
+2025-10-16 17:14:04,886 - donations_pipeline - INFO - [logger.py:93] - Model saved: C:\Users\zifue\Source\Repos\Python_dvl_env\Data\Output\IDR_v1\since_2000\major_gift_LogisticRegression_model.pkl
+2025-10-16 17:14:05,143 - donations_pipeline - INFO - [logger.py:93] - Model saved: C:\Users\zifue\Source\Repos\Python_dvl_env\Data\Output\IDR_v1\since_2000\major_gift_RandomForest_model.pkl
+2025-10-16 17:14:05,170 - donations_pipeline - INFO - [logger.py:93] - Model saved: C:\Users\zifue\Source\Repos\Python_dvl_env\Data\Output\IDR_v1\since_2000\major_gift_LightGBM_model.pkl
+2025-10-16 17:14:05,371 - donations_pipeline - INFO - [logger.py:93] - Feature importance exported: C:\Users\zifue\Source\Repos\Python_dvl_env\Data\Output\IDR_v1\since_2000\field_importance_major_gift_RandomForest.csv
+2025-10-16 17:14:05,377 - donations_pipeline - INFO - [logger.py:93] - Feature importance exported: C:\Users\zifue\Source\Repos\Python_dvl_env\Data\Output\IDR_v1\since_2000\field_importance_major_gift_LightGBM.csv
+2025-10-16 17:14:05,377 - donations_pipeline - INFO - [logger.py:70] - Completed: Training Major Gift Propensity Models (56.47s)
+2025-10-16 17:14:05,407 - donations_pipeline - INFO - [logger.py:59] - Starting: Training Amount Prediction Model
+2025-10-16 17:14:05,408 - donations_pipeline - INFO - [logger.py:93] - Building amount dataset with cutoff: 2024-08-11
+2025-10-16 17:14:05,911 - donations_pipeline - INFO - [logger.py:93] - Amount dataset: 294 donors, median target=$200.00
+2025-10-16 17:14:05,919 - donations_pipeline - INFO - [logger.py:93] - Random split: train=220, test=74
+2025-10-16 17:14:05,920 - donations_pipeline - INFO - [logger.py:59] - Starting: Training Amount Regressor
+2025-10-16 17:14:06,380 - donations_pipeline - INFO - [logger.py:93] - Amount Model: MAE=$1375.58, R²=0.662
+2025-10-16 17:14:06,537 - donations_pipeline - INFO - [logger.py:93] - Model saved: C:\Users\zifue\Source\Repos\Python_dvl_env\Data\Output\IDR_v1\since_2000\amount_predictor_model.pkl
+2025-10-16 17:14:06,539 - donations_pipeline - INFO - [logger.py:70] - Completed: Training Amount Regressor (0.62s)
+2025-10-16 17:14:06,540 - donations_pipeline - INFO - [logger.py:70] - Completed: Training Amount Prediction Model (1.13s)
+2025-10-16 17:14:06,540 - donations_pipeline - INFO - [logger.py:59] - Starting: Training Time-to-Next Model
+2025-10-16 17:14:06,543 - donations_pipeline - INFO - [logger.py:93] - Building time dataset: 49 cutoffs
+2025-10-16 17:14:21,032 - donations_pipeline - INFO - [logger.py:93] - Time dataset: 33,287 observations, median=270.0 days
+2025-10-16 17:14:21,081 - donations_pipeline - INFO - [logger.py:93] - Time-based split: train=26,663 (80.1%), test=6,624 (19.9%)
+2025-10-16 17:14:21,081 - donations_pipeline - INFO - [logger.py:59] - Starting: Training Time-to-Next Regressor
+2025-10-16 17:17:33,958 - donations_pipeline - INFO - [logger.py:93] - Time Model: MAE=393.7 days, R²=-1.516
+2025-10-16 17:17:35,297 - donations_pipeline - INFO - [logger.py:93] - Model saved: C:\Users\zifue\Source\Repos\Python_dvl_env\Data\Output\IDR_v1\since_2000\time_to_next_predictor_model.pkl
+2025-10-16 17:17:35,298 - donations_pipeline - INFO - [logger.py:70] - Completed: Training Time-to-Next Regressor (194.22s)
+2025-10-16 17:17:35,298 - donations_pipeline - INFO - [logger.py:70] - Completed: Training Time-to-Next Model (208.76s)
+2025-10-16 17:17:35,304 - donations_pipeline - INFO - [logger.py:59] - Starting: Training Preference Model
+2025-10-16 17:17:35,307 - donations_pipeline - INFO - [logger.py:93] - Building preference dataset for fund: 47 cutoffs
+2025-10-16 17:17:49,982 - donations_pipeline - INFO - [logger.py:93] - Preference dataset: 19,541 observations, 6 fund categories
+2025-10-16 17:17:50,015 - donations_pipeline - INFO - [logger.py:93] - Time-based split: train=15,957 (81.7%), test=3,584 (18.3%)
+2025-10-16 17:17:50,016 - donations_pipeline - INFO - [logger.py:59] - Starting: Training Preference Classifier (LightGBM)
+2025-10-16 17:17:52,302 - donations_pipeline - INFO - [logger.py:93] - Preference Model: fund, Weighted F1=0.589, 6 classes
+2025-10-16 17:17:52,440 - donations_pipeline - INFO - [logger.py:93] - Model saved: C:\Users\zifue\Source\Repos\Python_dvl_env\Data\Output\IDR_v1\since_2000\preference_fund_model.pkl
+2025-10-16 17:17:52,441 - donations_pipeline - INFO - [logger.py:70] - Completed: Training Preference Classifier (LightGBM) (2.42s)
+2025-10-16 17:17:52,441 - donations_pipeline - INFO - [logger.py:70] - Completed: Training Preference Model (17.14s)
+2025-10-16 17:17:52,442 - donations_pipeline - INFO - [logger.py:70] - Completed: [4/7] Predictive Analytics - since_2000 (395.73s)
+2025-10-16 17:17:52,443 - donations_pipeline - INFO - [logger.py:59] - Starting: [5/7] Actionable Lists - since_2000
+2025-10-16 17:17:52,443 - donations_pipeline - INFO - [logger.py:59] - Starting: Generating Prospecting Playbook
+2025-10-16 17:17:54,821 - donations_pipeline - INFO - [logger.py:93] - Playbook generated: 4,244 donors
+2025-10-16 17:17:54,821 - donations_pipeline - INFO - [logger.py:70] - Completed: Generating Prospecting Playbook (2.38s)
+2025-10-16 17:17:54,990 - donations_pipeline - INFO - [logger.py:93] - Generated lapsed_12m: 3480 donors
+2025-10-16 17:17:54,990 - donations_pipeline - INFO - [logger.py:93] - Generated high_potential_sleeper: 1709 donors
+2025-10-16 17:17:54,991 - donations_pipeline - INFO - [logger.py:93] - Generated upgrade_candidates: 76 donors
+2025-10-16 17:17:54,991 - donations_pipeline - INFO - [logger.py:93] - Generated new_donors_90d: 46 donors
+2025-10-16 17:17:55,023 - donations_pipeline - INFO - [logger.py:70] - Completed: [5/7] Actionable Lists - since_2000 (2.58s)
+2025-10-16 17:17:55,106 - donations_pipeline - INFO - [logger.py:59] - Starting: [6/7] Packaging Results
+2025-10-16 17:17:55,106 - donations_pipeline - INFO - [logger.py:93] - Bundling results to Excel: Donations_DataModellingResult.xlsx
+2025-10-16 17:18:02,838 - donations_pipeline - INFO - [logger.py:93] - Excel bundle created: 24 sheets, 1.1 MB
+2025-10-16 17:18:02,870 - donations_pipeline - INFO - [logger.py:93] - Archived 29 files to: archive_20251016
+2025-10-16 17:18:02,870 - donations_pipeline - INFO - [logger.py:70] - Completed: [6/7] Packaging Results (7.76s)
+2025-10-16 17:18:02,872 - donations_pipeline - INFO - [logger.py:89] - Timing report saved to: C:\Users\zifue\Source\Repos\Python_dvl_env\Data\Output\IDR_v1\pipeline_timing.txt
+2025-10-16 17:18:02,872 - donations_pipeline - INFO - [logger.py:93] - ================================================================================
+2025-10-16 17:18:02,873 - donations_pipeline - INFO - [logger.py:93] - Pipeline completed successfully!
+2025-10-16 17:18:02,873 - donations_pipeline - INFO - [logger.py:93] - Results saved to: C:\Users\zifue\Source\Repos\Python_dvl_env\Data\Output\IDR_v1
+2025-10-16 17:18:02,873 - donations_pipeline - INFO - [logger.py:93] - ================================================================================
+2025-10-16 17:18:02,873 - donations_pipeline - INFO - [logger.py:59] - Starting: [7/7] Sending Email Notification
+2025-10-16 17:18:02,885 - donations_pipeline - INFO - [logger.py:93] - Email notifications disabled, skipping
+2025-10-16 17:18:02,885 - donations_pipeline - INFO - [logger.py:70] - Completed: [7/7] Sending Email Notification (0.01s)
+2025-10-16 18:27:10,775 - donations_pipeline - INFO - [logger.py:93] - ================================================================================
+2025-10-16 18:27:10,775 - donations_pipeline - INFO - [logger.py:93] - Donations Analytics Pipeline - Starting
+2025-10-16 18:27:10,775 - donations_pipeline - INFO - [logger.py:93] - ================================================================================
+2025-10-16 18:27:10,776 - donations_pipeline - INFO - [logger.py:59] - Starting: [1/6] Data Loading
+2025-10-16 18:27:10,776 - donations_pipeline - INFO - [logger.py:93] - Loading data from CSV: C:\Users\zifue\Source\Repos\Python_dvl_env\CapstoneProject\Data\Input\FullDataTable.csv
+2025-10-16 18:27:10,922 - donations_pipeline - INFO - [logger.py:93] - Loaded 35,612 rows, 43 columns
+2025-10-16 18:27:10,954 - donations_pipeline - INFO - [logger.py:93] - ✓ All required columns present
+2025-10-16 18:27:10,956 - donations_pipeline - WARNING - [logger.py:97] - Amount: 903 negative values
+2025-10-16 18:27:10,956 - donations_pipeline - WARNING - [logger.py:97] - Amount: 7 zero values
+2025-10-16 18:27:10,956 - donations_pipeline - INFO - [logger.py:93] - ✓ Data quality checks passed (35,612 rows)
+2025-10-16 18:27:10,958 - donations_pipeline - INFO - [logger.py:93] - ✓ Date range: 1899-12-31 to 2025-08-11 (125.6 years)
+2025-10-16 18:27:10,958 - donations_pipeline - WARNING - [logger.py:97] - Date range exceeds 50 years - verify data
+2025-10-16 18:27:10,976 - donations_pipeline - WARNING - [logger.py:97] - Relationship flag issues detected:
+  - PastParent: 12 invalid values
+2025-10-16 18:27:10,976 - donations_pipeline - INFO - [logger.py:70] - Completed: [1/6] Data Loading (0.20s)
+2025-10-16 18:27:10,976 - donations_pipeline - INFO - [logger.py:59] - Starting: [2/6] Data Preprocessing
+2025-10-16 18:27:10,976 - donations_pipeline - INFO - [logger.py:93] - Starting data preprocessing
+2025-10-16 18:27:11,068 - donations_pipeline - WARNING - [logger.py:97] - PastParent: Found 12 rows with invalid values
+2025-10-16 18:27:11,094 - donations_pipeline - INFO - [logger.py:93] - Exported 12 relationship flag anomalies to: C:\Users\zifue\Source\Repos\Python_dvl_env\CapstoneProject\Data\Output\IDR_v1\relationship_flag_anomalies.csv
+2025-10-16 18:27:11,232 - donations_pipeline - INFO - [logger.py:93] - Removed 910 rows with non-positive amounts
+2025-10-16 18:27:11,235 - donations_pipeline - INFO - [logger.py:93] - Preprocessing complete: 35,612 → 34,702 rows (43 → 46 columns)
+2025-10-16 18:27:11,447 - donations_pipeline - INFO - [logger.py:93] - Cleaned data exported: C:\Users\zifue\Source\Repos\Python_dvl_env\CapstoneProject\Data\Output\IDR_v1\cleaned_donations.csv
+2025-10-16 18:27:11,447 - donations_pipeline - INFO - [logger.py:70] - Completed: [2/6] Data Preprocessing (0.47s)
+2025-10-16 18:27:11,447 - donations_pipeline - INFO - [logger.py:93] - Ensuring sklearn compatibility (converting pd.NA)...
+2025-10-16 18:27:11,836 - donations_pipeline - INFO - [logger.py:93] - Conversion complete
+2025-10-16 18:27:11,848 - donations_pipeline - INFO - [logger.py:93] - 
+================================================================================
+2025-10-16 18:27:11,849 - donations_pipeline - INFO - [logger.py:93] - Analyzing: Since 2000
+2025-10-16 18:27:11,849 - donations_pipeline - INFO - [logger.py:93] - ================================================================================
+2025-10-16 18:27:11,850 - donations_pipeline - INFO - [logger.py:59] - Starting: [3/6] Basic Data Analytics - since_2000
+2025-10-16 18:27:11,864 - donations_pipeline - INFO - [logger.py:93] - Yearly trend: 26 years, total $21,376,073
+2025-10-16 18:27:11,885 - donations_pipeline - INFO - [logger.py:93] - Monthly trend: 303 months
+2025-10-16 18:27:12,014 - donations_pipeline - INFO - [logger.py:93] - Appeal analysis: 182 appeals, top: 2021MG
+2025-10-16 18:27:12,020 - donations_pipeline - INFO - [logger.py:93] - Fund analysis: 7 funds, top: BF
+2025-10-16 18:27:12,021 - donations_pipeline - INFO - [logger.py:93] - Generated 8 descriptive reports
+2025-10-16 18:27:12,032 - donations_pipeline - INFO - [logger.py:59] - Starting: RFM Computation
+2025-10-16 18:27:12,048 - donations_pipeline - INFO - [logger.py:93] - Using computed reference date: 2025-08-12
+2025-10-16 18:27:12,464 - donations_pipeline - INFO - [logger.py:93] - RFM Segment distribution:
+2025-10-16 18:27:12,464 - donations_pipeline - INFO - [logger.py:93] -   Regular: 2,341 (55.2%)
+2025-10-16 18:27:12,464 - donations_pipeline - INFO - [logger.py:93] -   At Risk / Lapsed: 903 (21.3%)
+2025-10-16 18:27:12,465 - donations_pipeline - INFO - [logger.py:93] -   Champion: 682 (16.1%)
+2025-10-16 18:27:12,465 - donations_pipeline - INFO - [logger.py:93] -   Loyal: 170 (4.0%)
+2025-10-16 18:27:12,465 - donations_pipeline - INFO - [logger.py:93] -   High Potential: 148 (3.5%)
+2025-10-16 18:27:12,465 - donations_pipeline - INFO - [logger.py:93] - RFM computed for 4,244 donors
+2025-10-16 18:27:12,465 - donations_pipeline - INFO - [logger.py:70] - Completed: RFM Computation (0.43s)
+2025-10-16 18:27:12,482 - donations_pipeline - INFO - [logger.py:93] - Identified 2,650 lapsed donors (>730 days, ≥$200 lifetime)
+2025-10-16 18:27:12,497 - donations_pipeline - INFO - [logger.py:93] - Relationship summary: 17 unique combinations
+2025-10-16 18:27:12,509 - donations_pipeline - INFO - [logger.py:70] - Completed: [3/6] Basic Data Analytics - since_2000 (0.66s)
+2025-10-16 18:27:12,509 - donations_pipeline - INFO - [logger.py:59] - Starting: [4/6] Predictive Analytics - since_2000
+2025-10-16 18:27:12,509 - donations_pipeline - INFO - [logger.py:59] - Starting: Training Re-donation Propensity Models
+2025-10-16 18:27:12,511 - donations_pipeline - INFO - [logger.py:93] - Building re-donation panel: 47 cutoffs
+2025-10-16 18:27:24,144 - donations_pipeline - INFO - [logger.py:93] - Panel created: 115,872 observations, 19,541 positive labels (16.9%)
+2025-10-16 18:27:24,299 - donations_pipeline - INFO - [logger.py:93] - Time-based split: train=95,985 (82.8%), test=19,887 (17.2%)
+2025-10-16 18:27:24,498 - donations_pipeline - INFO - [logger.py:59] - Starting: Training LogisticRegression
+2025-10-16 18:27:24,498 - donations_pipeline - INFO - [logger.py:93] - [LogisticRegression] Building pipeline...
+2025-10-16 18:27:24,499 - donations_pipeline - INFO - [logger.py:93] - [LogisticRegression] Starting model fitting (this is the main training step)...
+2025-10-16 18:27:45,900 - donations_pipeline - INFO - [logger.py:93] - [LogisticRegression] Model fitting complete.
+2025-10-16 18:27:45,900 - donations_pipeline - INFO - [logger.py:93] - [LogisticRegression] Starting model evaluation on test data...
+2025-10-16 18:27:46,039 - donations_pipeline - INFO - [logger.py:93] - LogisticRegression: AUC=0.911, F1=0.841
+2025-10-16 18:27:46,040 - donations_pipeline - INFO - [logger.py:93] - [LogisticRegression] Model evaluation complete.
+2025-10-16 18:27:46,040 - donations_pipeline - INFO - [logger.py:93] - [LogisticRegression] Storing results and saving model artifacts to disk...
+2025-10-16 18:27:46,045 - donations_pipeline - INFO - [logger.py:93] - Model saved: C:\Users\zifue\Source\Repos\Python_dvl_env\CapstoneProject\Data\Output\IDR_v1\since_2000\propensity_LogisticRegression_model.pkl
+2025-10-16 18:27:46,047 - donations_pipeline - INFO - [logger.py:93] - [LogisticRegression] Artifacts saved successfully.
+2025-10-16 18:27:46,047 - donations_pipeline - INFO - [logger.py:70] - Completed: Training LogisticRegression (21.55s)
+2025-10-16 18:27:46,047 - donations_pipeline - INFO - [logger.py:59] - Starting: Training RandomForest
+2025-10-16 18:27:46,047 - donations_pipeline - INFO - [logger.py:93] - [RandomForest] Building pipeline...
+2025-10-16 18:27:46,048 - donations_pipeline - INFO - [logger.py:93] - [RandomForest] Starting model fitting (this is the main training step)...
+2025-10-16 18:29:00,148 - donations_pipeline - INFO - [logger.py:93] - [RandomForest] Model fitting complete.
+2025-10-16 18:29:00,148 - donations_pipeline - INFO - [logger.py:93] - [RandomForest] Starting model evaluation on test data...
+2025-10-16 18:29:00,865 - donations_pipeline - INFO - [logger.py:93] - RandomForest: AUC=0.916, F1=0.930
+2025-10-16 18:29:00,865 - donations_pipeline - INFO - [logger.py:93] - [RandomForest] Model evaluation complete.
+2025-10-16 18:29:00,866 - donations_pipeline - INFO - [logger.py:93] - [RandomForest] Storing results and saving model artifacts to disk...
+2025-10-16 18:29:01,611 - donations_pipeline - INFO - [logger.py:93] - Model saved: C:\Users\zifue\Source\Repos\Python_dvl_env\CapstoneProject\Data\Output\IDR_v1\since_2000\propensity_RandomForest_model.pkl
+2025-10-16 18:29:01,612 - donations_pipeline - INFO - [logger.py:93] - [RandomForest] Artifacts saved successfully.
+2025-10-16 18:29:01,612 - donations_pipeline - INFO - [logger.py:70] - Completed: Training RandomForest (75.56s)
+2025-10-16 18:29:01,612 - donations_pipeline - INFO - [logger.py:59] - Starting: Training LightGBM
+2025-10-16 18:29:01,613 - donations_pipeline - INFO - [logger.py:93] - [LightGBM] Building pipeline...
+2025-10-16 18:29:01,614 - donations_pipeline - INFO - [logger.py:93] - [LightGBM] Starting model fitting (this is the main training step)...
+2025-10-16 18:29:04,944 - donations_pipeline - INFO - [logger.py:93] - [LightGBM] Model fitting complete.
+2025-10-16 18:29:04,944 - donations_pipeline - INFO - [logger.py:93] - [LightGBM] Starting model evaluation on test data...
+2025-10-16 18:29:05,231 - donations_pipeline - INFO - [logger.py:93] - LightGBM: AUC=0.921, F1=0.887
+2025-10-16 18:29:05,231 - donations_pipeline - INFO - [logger.py:93] - [LightGBM] Model evaluation complete.
+2025-10-16 18:29:05,232 - donations_pipeline - INFO - [logger.py:93] - [LightGBM] Storing results and saving model artifacts to disk...
+2025-10-16 18:29:05,259 - donations_pipeline - INFO - [logger.py:93] - Model saved: C:\Users\zifue\Source\Repos\Python_dvl_env\CapstoneProject\Data\Output\IDR_v1\since_2000\propensity_LightGBM_model.pkl
+2025-10-16 18:29:05,260 - donations_pipeline - INFO - [logger.py:93] - [LightGBM] Artifacts saved successfully.
+2025-10-16 18:29:05,262 - donations_pipeline - INFO - [logger.py:70] - Completed: Training LightGBM (3.65s)
+2025-10-16 18:29:05,536 - donations_pipeline - INFO - [logger.py:93] - Feature importance exported: C:\Users\zifue\Source\Repos\Python_dvl_env\CapstoneProject\Data\Output\IDR_v1\since_2000\field_importance_propensity_RandomForest.csv
+2025-10-16 18:29:05,544 - donations_pipeline - INFO - [logger.py:93] - Feature importance exported: C:\Users\zifue\Source\Repos\Python_dvl_env\CapstoneProject\Data\Output\IDR_v1\since_2000\field_importance_propensity_LightGBM.csv
+2025-10-16 18:29:05,545 - donations_pipeline - INFO - [logger.py:70] - Completed: Training Re-donation Propensity Models (113.03s)
+2025-10-16 18:29:05,639 - donations_pipeline - INFO - [logger.py:59] - Starting: Training Major Gift Propensity Models
+2025-10-16 18:29:05,640 - donations_pipeline - INFO - [logger.py:93] - Building major gift panel: 47 cutoffs, threshold=$1,000
+2025-10-16 18:29:20,955 - donations_pipeline - INFO - [logger.py:93] - Major gift panel: 115,872 observations, 2,341 major gifts (2.0%)
+2025-10-16 18:29:21,124 - donations_pipeline - INFO - [logger.py:93] - Time-based split: train=95,985 (82.8%), test=19,887 (17.2%)
+2025-10-16 18:29:21,125 - donations_pipeline - INFO - [logger.py:59] - Starting: Training LogisticRegression
+2025-10-16 18:29:21,126 - donations_pipeline - INFO - [logger.py:93] - [LogisticRegression] Building pipeline...
+2025-10-16 18:29:21,126 - donations_pipeline - INFO - [logger.py:93] - [LogisticRegression] Starting model fitting (this is the main training step)...
+2025-10-16 18:29:47,773 - donations_pipeline - INFO - [logger.py:93] - [LogisticRegression] Model fitting complete.
+2025-10-16 18:29:47,774 - donations_pipeline - INFO - [logger.py:93] - [LogisticRegression] Starting model evaluation on test data...
+2025-10-16 18:29:48,012 - donations_pipeline - INFO - [logger.py:93] - LogisticRegression: AUC=0.906, F1=0.930
+2025-10-16 18:29:48,012 - donations_pipeline - INFO - [logger.py:93] - [LogisticRegression] Model evaluation complete.
+2025-10-16 18:29:48,012 - donations_pipeline - INFO - [logger.py:93] - [LogisticRegression] Storing results and saving model artifacts to disk...
+2025-10-16 18:29:48,021 - donations_pipeline - INFO - [logger.py:93] - Model saved: C:\Users\zifue\Source\Repos\Python_dvl_env\CapstoneProject\Data\Output\IDR_v1\since_2000\propensity_LogisticRegression_model.pkl
+2025-10-16 18:29:48,022 - donations_pipeline - INFO - [logger.py:93] - [LogisticRegression] Artifacts saved successfully.
+2025-10-16 18:29:48,022 - donations_pipeline - INFO - [logger.py:70] - Completed: Training LogisticRegression (26.90s)
+2025-10-16 18:29:48,022 - donations_pipeline - INFO - [logger.py:59] - Starting: Training RandomForest
+2025-10-16 18:29:48,023 - donations_pipeline - INFO - [logger.py:93] - [RandomForest] Building pipeline...
+2025-10-16 18:29:48,023 - donations_pipeline - INFO - [logger.py:93] - [RandomForest] Starting model fitting (this is the main training step)...
+2025-10-16 18:30:09,654 - donations_pipeline - INFO - [logger.py:93] - [RandomForest] Model fitting complete.
+2025-10-16 18:30:09,654 - donations_pipeline - INFO - [logger.py:93] - [RandomForest] Starting model evaluation on test data...
+2025-10-16 18:30:10,320 - donations_pipeline - INFO - [logger.py:93] - RandomForest: AUC=0.923, F1=0.985
+2025-10-16 18:30:10,321 - donations_pipeline - INFO - [logger.py:93] - [RandomForest] Model evaluation complete.
+2025-10-16 18:30:10,321 - donations_pipeline - INFO - [logger.py:93] - [RandomForest] Storing results and saving model artifacts to disk...
+2025-10-16 18:30:10,761 - donations_pipeline - INFO - [logger.py:93] - Model saved: C:\Users\zifue\Source\Repos\Python_dvl_env\CapstoneProject\Data\Output\IDR_v1\since_2000\propensity_RandomForest_model.pkl
+2025-10-16 18:30:10,762 - donations_pipeline - INFO - [logger.py:93] - [RandomForest] Artifacts saved successfully.
+2025-10-16 18:30:10,763 - donations_pipeline - INFO - [logger.py:70] - Completed: Training RandomForest (22.74s)
+2025-10-16 18:30:10,763 - donations_pipeline - INFO - [logger.py:59] - Starting: Training LightGBM
+2025-10-16 18:30:10,763 - donations_pipeline - INFO - [logger.py:93] - [LightGBM] Building pipeline...
+2025-10-16 18:30:10,763 - donations_pipeline - INFO - [logger.py:93] - [LightGBM] Starting model fitting (this is the main training step)...
+2025-10-16 18:30:12,116 - donations_pipeline - INFO - [logger.py:93] - [LightGBM] Model fitting complete.
+2025-10-16 18:30:12,117 - donations_pipeline - INFO - [logger.py:93] - [LightGBM] Starting model evaluation on test data...
+2025-10-16 18:30:12,397 - donations_pipeline - INFO - [logger.py:93] - LightGBM: AUC=0.938, F1=0.957
+2025-10-16 18:30:12,398 - donations_pipeline - INFO - [logger.py:93] - [LightGBM] Model evaluation complete.
+2025-10-16 18:30:12,398 - donations_pipeline - INFO - [logger.py:93] - [LightGBM] Storing results and saving model artifacts to disk...
+2025-10-16 18:30:12,424 - donations_pipeline - INFO - [logger.py:93] - Model saved: C:\Users\zifue\Source\Repos\Python_dvl_env\CapstoneProject\Data\Output\IDR_v1\since_2000\propensity_LightGBM_model.pkl
+2025-10-16 18:30:12,425 - donations_pipeline - INFO - [logger.py:93] - [LightGBM] Artifacts saved successfully.
+2025-10-16 18:30:12,426 - donations_pipeline - INFO - [logger.py:70] - Completed: Training LightGBM (1.66s)
+2025-10-16 18:30:12,435 - donations_pipeline - INFO - [logger.py:93] - Model saved: C:\Users\zifue\Source\Repos\Python_dvl_env\CapstoneProject\Data\Output\IDR_v1\since_2000\major_gift_LogisticRegression_model.pkl
+2025-10-16 18:30:12,787 - donations_pipeline - INFO - [logger.py:93] - Model saved: C:\Users\zifue\Source\Repos\Python_dvl_env\CapstoneProject\Data\Output\IDR_v1\since_2000\major_gift_RandomForest_model.pkl
+2025-10-16 18:30:12,814 - donations_pipeline - INFO - [logger.py:93] - Model saved: C:\Users\zifue\Source\Repos\Python_dvl_env\CapstoneProject\Data\Output\IDR_v1\since_2000\major_gift_LightGBM_model.pkl
+2025-10-16 18:30:13,156 - donations_pipeline - INFO - [logger.py:93] - Feature importance exported: C:\Users\zifue\Source\Repos\Python_dvl_env\CapstoneProject\Data\Output\IDR_v1\since_2000\field_importance_major_gift_RandomForest.csv
+2025-10-16 18:30:13,167 - donations_pipeline - INFO - [logger.py:93] - Feature importance exported: C:\Users\zifue\Source\Repos\Python_dvl_env\CapstoneProject\Data\Output\IDR_v1\since_2000\field_importance_major_gift_LightGBM.csv
+2025-10-16 18:30:13,168 - donations_pipeline - INFO - [logger.py:70] - Completed: Training Major Gift Propensity Models (67.53s)
+2025-10-16 18:30:13,201 - donations_pipeline - INFO - [logger.py:59] - Starting: Training Amount Prediction Model
+2025-10-16 18:30:13,202 - donations_pipeline - INFO - [logger.py:93] - Building amount dataset with cutoff: 2024-08-11
+2025-10-16 18:30:13,888 - donations_pipeline - INFO - [logger.py:93] - Amount dataset: 294 donors, median target=$200.00
+2025-10-16 18:30:13,898 - donations_pipeline - INFO - [logger.py:93] - Random split: train=220, test=74
+2025-10-16 18:30:13,899 - donations_pipeline - INFO - [logger.py:59] - Starting: Training Amount Regressor
+2025-10-16 18:30:14,450 - donations_pipeline - INFO - [logger.py:93] - Amount Model: MAE=$1375.58, R²=0.662
+2025-10-16 18:30:14,565 - donations_pipeline - INFO - [logger.py:93] - Model saved: C:\Users\zifue\Source\Repos\Python_dvl_env\CapstoneProject\Data\Output\IDR_v1\since_2000\amount_predictor_model.pkl
+2025-10-16 18:30:14,566 - donations_pipeline - INFO - [logger.py:70] - Completed: Training Amount Regressor (0.67s)
+2025-10-16 18:30:14,566 - donations_pipeline - INFO - [logger.py:70] - Completed: Training Amount Prediction Model (1.36s)
+2025-10-16 18:30:14,567 - donations_pipeline - INFO - [logger.py:59] - Starting: Training Time-to-Next Model
+2025-10-16 18:30:14,570 - donations_pipeline - INFO - [logger.py:93] - Building time dataset: 49 cutoffs
+2025-10-16 18:30:33,817 - donations_pipeline - INFO - [logger.py:93] - Time dataset: 33,287 observations, median=270.0 days
+2025-10-16 18:30:33,877 - donations_pipeline - INFO - [logger.py:93] - Time-based split: train=26,663 (80.1%), test=6,624 (19.9%)
+2025-10-16 18:30:33,878 - donations_pipeline - INFO - [logger.py:59] - Starting: Training Time-to-Next Regressor
+2025-10-16 18:34:14,038 - donations_pipeline - INFO - [logger.py:93] - Time Model: MAE=393.7 days, R²=-1.516
+2025-10-16 18:34:15,598 - donations_pipeline - INFO - [logger.py:93] - Model saved: C:\Users\zifue\Source\Repos\Python_dvl_env\CapstoneProject\Data\Output\IDR_v1\since_2000\time_to_next_predictor_model.pkl
+2025-10-16 18:34:15,600 - donations_pipeline - INFO - [logger.py:70] - Completed: Training Time-to-Next Regressor (221.72s)
+2025-10-16 18:34:15,600 - donations_pipeline - INFO - [logger.py:70] - Completed: Training Time-to-Next Model (241.03s)
+2025-10-16 18:34:15,607 - donations_pipeline - INFO - [logger.py:59] - Starting: Training Preference Model
+2025-10-16 18:34:15,611 - donations_pipeline - INFO - [logger.py:93] - Building preference dataset for fund: 47 cutoffs
+2025-10-16 18:34:31,980 - donations_pipeline - INFO - [logger.py:93] - Preference dataset: 19,541 observations, 6 fund categories
+2025-10-16 18:34:32,021 - donations_pipeline - INFO - [logger.py:93] - Time-based split: train=15,957 (81.7%), test=3,584 (18.3%)
+2025-10-16 18:34:32,022 - donations_pipeline - INFO - [logger.py:59] - Starting: Training Preference Classifier (LightGBM)
+2025-10-16 18:34:35,272 - donations_pipeline - INFO - [logger.py:93] - Preference Model: fund, Weighted F1=0.589, 6 classes
+2025-10-16 18:34:35,419 - donations_pipeline - INFO - [logger.py:93] - Model saved: C:\Users\zifue\Source\Repos\Python_dvl_env\CapstoneProject\Data\Output\IDR_v1\since_2000\preference_fund_model.pkl
+2025-10-16 18:34:35,421 - donations_pipeline - INFO - [logger.py:70] - Completed: Training Preference Classifier (LightGBM) (3.40s)
+2025-10-16 18:34:35,422 - donations_pipeline - INFO - [logger.py:70] - Completed: Training Preference Model (19.81s)
+2025-10-16 18:34:35,424 - donations_pipeline - INFO - [logger.py:70] - Completed: [4/6] Predictive Analytics - since_2000 (442.91s)
+2025-10-16 18:34:35,424 - donations_pipeline - INFO - [logger.py:59] - Starting: [5/6] Actionable Lists - since_2000
+2025-10-16 18:34:35,425 - donations_pipeline - INFO - [logger.py:59] - Starting: Generating Prospecting Playbook
+2025-10-16 18:34:38,673 - donations_pipeline - INFO - [logger.py:93] - Playbook generated: 4,244 donors
+2025-10-16 18:34:38,673 - donations_pipeline - INFO - [logger.py:70] - Completed: Generating Prospecting Playbook (3.25s)
+2025-10-16 18:34:38,856 - donations_pipeline - INFO - [logger.py:93] - Generated lapsed_12m: 3480 donors
+2025-10-16 18:34:38,856 - donations_pipeline - INFO - [logger.py:93] - Generated high_potential_sleeper: 1709 donors
+2025-10-16 18:34:38,856 - donations_pipeline - INFO - [logger.py:93] - Generated upgrade_candidates: 76 donors
+2025-10-16 18:34:38,857 - donations_pipeline - INFO - [logger.py:93] - Generated new_donors_90d: 46 donors
+2025-10-16 18:34:38,886 - donations_pipeline - INFO - [logger.py:70] - Completed: [5/6] Actionable Lists - since_2000 (3.46s)
+2025-10-16 18:34:38,995 - donations_pipeline - INFO - [logger.py:59] - Starting: [6/6] Packaging Results
+2025-10-16 18:34:38,995 - donations_pipeline - INFO - [logger.py:93] - Bundling results to Excel: Donations_DataModellingResult.xlsx
+2025-10-16 18:34:46,208 - donations_pipeline - INFO - [logger.py:93] - Excel bundle created: 24 sheets, 1.1 MB
+2025-10-16 18:34:46,234 - donations_pipeline - INFO - [logger.py:93] - Archived 29 files to: archive_20251016_2
+2025-10-16 18:34:46,235 - donations_pipeline - INFO - [logger.py:70] - Completed: [6/6] Packaging Results (7.24s)
+2025-10-16 18:34:46,237 - donations_pipeline - INFO - [logger.py:89] - Timing report saved to: C:\Users\zifue\Source\Repos\Python_dvl_env\CapstoneProject\Data\Output\IDR_v1\pipeline_timing.txt
+2025-10-16 18:34:46,238 - donations_pipeline - INFO - [logger.py:93] - ================================================================================
+2025-10-16 18:34:46,238 - donations_pipeline - INFO - [logger.py:93] - Pipeline completed successfully!
+2025-10-16 18:34:46,238 - donations_pipeline - INFO - [logger.py:93] - Results saved to: C:\Users\zifue\Source\Repos\Python_dvl_env\CapstoneProject\Data\Output\IDR_v1
+2025-10-16 18:34:46,238 - donations_pipeline - INFO - [logger.py:93] - ================================================================================

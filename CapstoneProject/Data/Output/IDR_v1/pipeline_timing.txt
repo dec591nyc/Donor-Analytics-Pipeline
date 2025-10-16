@@ -1,0 +1,28 @@
+Operation Timing Report
+================================================================================
+
+[1/6] Data Loading                                       0.20s (  0.0%)
+[2/6] Data Preprocessing                                 0.47s (  0.0%)
+RFM Computation                                          0.43s (  0.0%)
+[3/6] Basic Data Analytics - since_2000                  0.66s (  0.1%)
+Training LogisticRegression                             21.55s (  1.7%)
+Training RandomForest                                   75.56s (  5.9%)
+Training LightGBM                                        3.65s (  0.3%)
+Training Re-donation Propensity Models                 113.03s (  8.8%)
+Training LogisticRegression                             26.90s (  2.1%)
+Training RandomForest                                   22.74s (  1.8%)
+Training LightGBM                                        1.66s (  0.1%)
+Training Major Gift Propensity Models                   67.53s (  5.3%)
+Training Amount Regressor                                0.67s (  0.1%)
+Training Amount Prediction Model                         1.36s (  0.1%)
+Training Time-to-Next Regressor                        221.72s ( 17.3%)
+Training Time-to-Next Model                            241.03s ( 18.8%)
+Training Preference Classifier (LightGBM)                3.40s (  0.3%)
+Training Preference Model                               19.81s (  1.5%)
+[4/6] Predictive Analytics - since_2000                442.91s ( 34.6%)
+Generating Prospecting Playbook                          3.25s (  0.3%)
+[5/6] Actionable Lists - since_2000                      3.46s (  0.3%)
+[6/6] Packaging Results                                  7.24s (  0.6%)
+
+================================================================================
+Total Time                                            1279.25s
