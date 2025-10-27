@@ -1,487 +1,148 @@
-# Donations Analytics Pipeline (Refactored) 🎯
+# Donations Analytics Pipeline — Operations Guide
+This handbook explains how to install, configure, and operate the donations analytics pipeline, how to automate runs on Windows, and how to interpret every worksheet in the delivered Excel workbook.
+ 
+## 1. Overview
+The pipeline performs the following end-to-end steps:
+1. Load donation transactions from either a SQL Server source or a pre-extracted CSV.
+2. Validate column headers and clean the dataset (duplicate removal, null handling, type coercion).
+3. Build descriptive statistics (year/month trends, demographic distributions, relationship analyses).
+4. Train predictive models for re-donation, major-gift propensity, gift amount, time-to-next gift, and likely fund/appeal.
+5. Generate actionable donor lists (lapsed, high-potential sleepers, upgrade candidates, and new donors).
+6. Package all outputs—CSV, JSON metrics, and charts—into a single Excel workbook and archive run artefacts.
+ 
+## 2. Environment setup
+### 2.1 Python and packages
+1. Install **Python 3.10+**.
+2. Install required packages with the provided file:
+   ```bash
+   pip install -r requirements.txt
+   ```
+   The default `requirements.txt` includes:
+   - `pandas`, `numpy` for data preparation
+   - `scikit-learn`, `lightgbm`, `shap` for modelling and interpretation
+   - `pyodbc` for SQL Server extraction
+   - `openpyxl`, `matplotlib` for Excel export and charting
+ 
+### 2.2 External dependencies
+- **SQL Server connectivity** (optional): install the Microsoft ODBC Driver 17 or 18 for SQL Server. On Windows, this is available through the official MSI installer; on Linux, install `unixODBC` plus the Microsoft driver package.
 
-A production-ready, modular analytics pipeline for donor data analysis and predictive modeling.
+### 2.3 Environment variables and secrets
+Store any sensitive values in a `.env` file located alongside `main.py`. The loader automatically reads keys such as `SQLSERVER_USER`, `SQLSERVER_PASSWORD`, `SMTP_USERNAME`, and `SMTP_PASSWORD`.
 
----
-
-## 📁 Project Structure
-
-```
-donations_pipeline/
-│
-├── 📦 Core Modules
-│   ├── config.py                    # Configuration management
-│   ├── logger.py                    # Logging & performance tracking
-│   ├── data_loader.py               # Data loading (CSV/SQL)
-│   ├── preprocessor.py              # Data preprocessing & feature engineering
-│   │
-├── 📊 Analytics Modules
-│   ├── descriptive_analytics.py     # Trends & distributions
-│   ├── rfm_analysis.py              # RFM segmentation
-│   ├── actionable_lists.py          # Targeting & reactivation lists
-│   │
-├── 🤖 Machine Learning
-│   ├── models.py                    # Model trainers & evaluators
-│   ├── predictive_pipeline.py       # Prediction orchestration
-│   │
-├── 📤 Output Management
-│   ├── output_manager.py            # Results packaging & archiving
-│   │
-└── 🚀 Entry Point
-    └── main.py                      # Pipeline orchestration
-```
-
----
-
-## 🚀 Quick Start
-
-### Installation
-
+## 3. Running the pipeline
+### 3.1 Command-line (CSV extract)
 ```bash
-# Clone repository
-git clone <repository-url>
-cd CapstoneProject
-
-# Install dependencies
-pip install -r requirements.txt
-
-# Install as package (optional)
-pip install -e .
-```
-
-### Basic Usage
-
-```bash
-# Run with CSV input
-python -m donations_pipeline.main \
-    --input_file data/FullDataTable.csv \
-    --out_dir outputs \
-    --year_cutoff 2000
-
-# Run with SQL extraction
-python -m donations_pipeline.main \
-    --use_sql true \
-    --sql_server localhost \
-    --sql_db DonorDatabase \
-    --out_dir outputs
-```
-
-### Python API Usage
-
-```python
-from donations_pipeline.config import Config
-from donations_pipeline.main import DonationsPipeline
-
-# Create configuration
-config = Config(
-    input_file="data.csv",
-    out_dir="outputs",
-    analysis=AnalysisConfig(
-        year_cutoff=2000,
-        major_gift_threshold=1000.0
-    )
-)
-
-# Run pipeline
-pipeline = DonationsPipeline(config)
-pipeline.run()
-```
-
----
-
-## 🎯 Features
-
-### 1. Descriptive Analytics
-- **Yearly trends:** Total donations, donor counts, averages
-- **Monthly trends:** Seasonal patterns
-- **Demographic distributions:** Gender, age group, occupation, suburb
-- **Campaign performance:** Appeal and fund effectiveness
-
-### 2. RFM Segmentation
-- **Recency:** Days since last donation
-- **Frequency:** Number of donations
-- **Monetary:** Total donation amount
-- **Segments:** Champions, Loyal, At Risk, High Potential, Regular
-
-### 3. Relationship Analysis
-- School relationship patterns (current/past parent, student)
-- Trends over time
-- Cross-analysis with demographics
-
-### 4. Actionable Lists
-- **Lapsed donors:** >12 months inactive with history
-- **High-potential sleepers:** Valuable but dormant
-- **Upgrade candidates:** Recent increased giving
-- **New donors:** Acquired in last 90 days
-
-### 5. Predictive Models
-
-#### Re-donation Propensity
-Predicts likelihood of future donation within time window
-- Models: Logistic Regression, Random Forest, LightGBM
-- Features: RFM metrics + demographics
-- Output: Probability scores per donor
-
-#### Major Gift Propensity
-Predicts likelihood of donation ≥ threshold
-- Configurable threshold (default: $1,000)
-- Time-based validation to avoid leakage
-
-#### Donation Amount
-Predicts expected future donation amount
-- Random Forest regressor
-- Output: Point estimate per donor
-
-#### Time to Next Donation
-Predicts days until next donation
-- Random Forest regressor
-- Confidence intervals (20th, 50th, 80th percentile)
-
-#### Fund/Appeal Preference
-Predicts most likely fund/appeal for next donation
-- Multiclass classifier
-- Top-3 preferences with probabilities
-
-### 6. Prospecting Playbook
-Combines all predictions into actionable donor profiles:
-- Predicted amount
-- Predicted next donation date
-- Preferred fund/appeal
-- Priority score (composite metric)
-- Action bucket (VIP, Upgrade, Reactivation, Nurture)
-
----
-
-## ⚙️ Configuration Options
-
-### Command Line Arguments
-
-```bash
-# Data Input
---input_file          Path to CSV file (required)
---use_sql            Extract from SQL Server (true/false)
---sql_server         SQL Server address
---sql_db             Database name
---sql_trusted        Use Windows Auth (true/false)
-
-# Output
---out_dir            Output directory (default: outputs)
---excel_name         Excel filename (default: Donations_DataModellingResult.xlsx)
-
-# Analysis Parameters
---rfm_reference      RFM reference date (YYYY-MM-DD)
---window_days        Prediction window in days (default: 365)
---major_threshold    Major gift amount (default: 1000.0)
---year_cutoff        Analysis year cutoff (default: 2000)
-```
-
-### Programmatic Configuration
-
-```python
-from donations_pipeline.config import Config, AnalysisConfig, ModelConfig
-
-config = Config(
-    input_file="data.csv",
-    out_dir="outputs",
-    
-    analysis=AnalysisConfig(
-        year_cutoff=2000,
-        major_gift_threshold=1000.0,
-        lapsed_recency_days=730,
-        age_bins=[0, 25, 35, 45, 55, 65, 75, 200]
-    ),
-    
-    models=ModelConfig(
-        rf_n_estimators=300,
-        lgbm_learning_rate=0.05
-    )
-)
-```
-
----
-
-## 📊 Output Files
-
-### Directory Structure
-
-```
-outputs/
-├── pipeline.log                              # Execution log
-├── pipeline_timing.txt                       # Performance report
-├── cleaned_donations.csv                     # Preprocessed data
-│
-├── since_2000/                               # Analysis slice
-│   ├── 📈 Descriptive
-│   │   ├── trend_year.csv
-│   │   ├── trend_month.csv
-│   │   ├── dist_gender.csv
-│   │   ├── dist_agegroup.csv
-│   │   ├── appeal_performance.csv
-│   │   └── fund_performance.csv
-│   │
-│   ├── 🎯 Segmentation
-│   │   ├── rfm_table.csv
-│   │   ├── lapsed_targets.csv
-│   │   ├── relationship_summary.csv
-│   │   └── relationship_trend.csv
-│   │
-│   ├── 📋 Actionable Lists
-│   │   ├── lapsed_12m.csv
-│   │   ├── high_potential_sleeper.csv
-│   │   ├── upgrade_candidates.csv
-│   │   └── new_donors_90d.csv
-│   │
-│   ├── 🤖 Predictive Models
-│   │   ├── propensity_RandomForest_model.pkl
-│   │   ├── propensity_RandomForest_metrics.json
-│   │   ├── major_gift_LightGBM_model.pkl
-│   │   ├── amount_predictor_model.pkl
-│   │   ├── time_to_next_predictor_model.pkl
-│   │   ├── preference_fund_model.pkl
-│   │   └── field_importance_*.csv
-│   │
-│   ├── 🎯 Predictions
-│   │   └── prospecting_playbook.csv         # Combined predictions
-│   │
-│   └── 📦 Packaged Results
-│       └── Donations_DataModellingResult.xlsx
-```
-
----
-
-## 🔧 Advanced Usage
-
-### 1. Custom Analysis Workflow
-
-```python
-from donations_pipeline.data_loader import DataLoader
-from donations_pipeline.rfm_analysis import RFMAnalyzer
-from donations_pipeline.logger import setup_logger
-
-# Setup
-config = Config(input_file="data.csv")
-logger = setup_logger(config.output_path)
-
-# Load data
-loader = DataLoader(config, logger)
-df = loader.load_data()
-
-# Run only RFM
-rfm_analyzer = RFMAnalyzer(config, logger)
-rfm_df = rfm_analyzer.compute_rfm(df)
-
-# Custom threshold for lapsed donors
-lapsed = rfm_analyzer.identify_lapsed_donors(
-    rfm_df, 
-    recency_threshold=365,  # 1 year
-    min_monetary=500.0      # $500 minimum
-)
-```
-
-### 2. Model Reuse for Predictions
-
-```python
-import joblib
-import pandas as pd
-
-# Load trained model
-model = joblib.load("outputs/since_2000/propensity_RandomForest_model.pkl")
-
-# Prepare new data
-new_donors = pd.DataFrame({
-    'Recency': [30, 90, 180],
-    'Frequency': [5, 3, 1],
-    'Monetary': [1500, 500, 100],
-    # ... other features
-})
-
-# Predict
-probabilities = model.predict_proba(new_donors)[:, 1]
-print(f"Re-donation probabilities: {probabilities}")
-```
-
-### 3. Batch Processing Multiple Files
-
-```python
-from pathlib import Path
-
-input_dir = Path("data/monthly_exports")
-
-for csv_file in input_dir.glob("*.csv"):
-    config = Config(
-        input_file=str(csv_file),
-        out_dir=f"outputs/{csv_file.stem}"
-    )
-    
-    pipeline = DonationsPipeline(config)
-    pipeline.run()
-```
-
----
-
-## 🧪 Testing
-
-### Run Tests
-
-```bash
-# Install dev dependencies
-pip install pytest pytest-cov
-
-# Run unit tests
-pytest tests/
-
-# With coverage report
-pytest --cov=donations_pipeline tests/
-```
-
-### Example Test
-
-```python
-# tests/test_rfm.py
-import pytest
-from donations_pipeline.rfm_analysis import RFMAnalyzer
-
-def test_rfm_scores_within_range(sample_data, test_config, test_logger):
-    analyzer = RFMAnalyzer(test_config, test_logger)
-    rfm_df = analyzer.compute_rfm(sample_data)
-    
-    assert rfm_df['R_score'].between(1, 5).all()
-    assert rfm_df['F_score'].between(1, 5).all()
-    assert rfm_df['M_score'].between(1, 5).all()
-```
-
----
-
-## 📈 Performance
-
-### Typical Execution Times
-
-| Dataset Size | Records | Duration |
-|--------------|---------|----------|
-| Small        | 10K     | ~30s     |
-| Medium       | 100K    | ~3min    |
-| Large        | 1M      | ~20min   |
-
-### Memory Usage
-
-- **CSV Loading:** ~2x file size
-- **Feature Engineering:** ~3x data size
-- **Model Training:** ~4x data size
-
-*For datasets >500K records, consider chunked processing or sampling*
-
----
-
-## 🐛 Troubleshooting
-
-### Common Issues
-
-#### 1. Out of Memory
-
-```python
-# Solution: Use year cutoff or sample
-config.analysis.year_cutoff = 2015  # Only recent data
-```
-
-#### 2. SQL Connection Failed
-
-```bash
-# Check driver installation
-pip install pyodbc
-
-# Verify ODBC driver
-odbcinst -j
-
-# Try different driver
---sql_odbc_driver "ODBC Driver 17 for SQL Server"
-```
-
-#### 3. Model Training Fails
-
-```python
-# Check minimum samples
-if len(X_train) < config.analysis.min_samples_for_training:
-    logger.warning("Insufficient samples for training")
-```
-
-### Debug Mode
-
-```bash
-# Enable verbose logging
-export LOG_LEVEL=DEBUG
-python -m donations_pipeline.main --input_file data.csv
-```
-
----
-
-## 🔒 Security Considerations
-
-1. **SQL Injection:** All queries use parameterized statements
-2. **Path Traversal:** All paths validated with `Path.resolve()`
-3. **Sensitive Data:** Configure `.gitignore` to exclude data files
-4. **Credentials:** Never commit SQL passwords; use environment variables
-
-```bash
-# Use environment variables for credentials
-export SQL_USER="myuser"
-export SQL_PASSWORD="mypassword"
-```
-
----
-
-## 📚 Documentation
-
-- **Code Documentation:** Inline docstrings in all modules
-- **Architecture:** See `REFACTORING_SUMMARY.md`
-- **API Reference:** Use `help(DonationsPipeline)`
-
----
-
-## 🤝 Contributing
-
-### Development Setup
-
-```bash
-# Install dev dependencies
-pip install -r requirements-dev.txt
-
-# Install pre-commit hooks
-pre-commit install
-
-# Run linting
-flake8 donations_pipeline/
-black donations_pipeline/
-mypy donations_pipeline/
-```
-
-### Adding New Features
-
-1. Create new module in appropriate category
-2. Follow existing patterns (dependency injection, logging)
-3. Add unit tests
-4. Update documentation
-
----
-
-## 📝 License
-
-[Your License Here]
-
----
-
-## 👥 Authors
-
-- **Original Implementation:** Yichi Nien
-- **Refactoring:** October 2025
-
----
-
-## 🙏 Acknowledgments
-
-Built with modern Python best practices for production-grade data analytics.
-
----
-
-**Status:** ✅ Production Ready  
-**Version:** 2.0.0 (Refactored)  
-**Last Updated:** October 2025
+python -m donations_pipeline.main ^
+    --input_file /path/to/FullDataTable.csv ^
+    --out_dir /path/to/outputs ^
+    --year_cutoff 2010 ^
+    --window_days 365 ^
+    --major_threshold 1000
+ ```
+### 3.2 Command-line (SQL Server export)
+ ```bash
+python -m donations_pipeline.main ^
+    --use_sql true ^
+    --sql_server "SPKSDB02" ^
+    --sql_db "UniSA_DonorAnalysis" ^
+    --window_days 365 ^
+    --major_threshold 1000 ^
+    --year_cutoff 2000 ^
+    --out_dir "C:\Users\sysuni01\Documents\Python\Data\Output\IDR_v1" ^
+    --input_file "C:\Users\sysuni01\Documents\Python\Data\Input\FullDataTable.csv" ^   # destination CSV created by the loader
+    --excel_name "Donations_DataModellingResult.xlsx"
+ ```
+
+The script streams results in batches, writes the CSV named in `--input_file`, and continues with the standard analytics flow.
+A ready-to-edit batch file is provided at the project root (`run_donations_pipeline.bat`). To schedule or manually trigger the pipeline on Windows:
+1. Open the BAT file in a text editor.
+2. Update the paths at the top for `PROJECT_ROOT`, `INPUT_FILE`, `OUTPUT_DIR`, and `VENV_DIR`.
+3. Uncomment the SQL block if you prefer a direct database extract, then fill in server, database, credential, table, and driver names.
+4. Double-click the BAT file or schedule it via Windows Task Scheduler. The script activates the virtual environment, runs the pipeline, prints the output folder, and pauses so that any errors remain visible.
+
+## 4. Excel delivery workbook
+The workbook `<out_dir>/since_<YEAR>/<excel_name>` consolidates every CSV and JSON artefact. A `Contents` sheet links each source file to the relevant tab, and flattened JSON metrics (e.g., model scores) appear in `json_metrics` when available.
+ 
+### 4.1 Prospecting & predictive insights
+- **`prospecting_playbook`** (from `prospecting_playbook.csv`)
+- `ID`: Donor identifier.
+- `pred_amount`: Expected value of the next gift from the RandomForest regression model.
+- `pred_days_to_next`: Predicted days until the next donation from the time-to-next gradient boosting regressor.
+- `pred_date_point`, `pred_date_p20`, `pred_date_p50`, `pred_date_p80`: Projected next-gift dates at point estimate and 20th/50th/80th percentile confidence intervals.
+- `top1_fund`/`top2_fund`/`top3_fund` or `top1_appeal`…: Highest-probability destinations from the preference classifier.
+- `top1_prob`/`top2_prob`/`top3_prob`: Probabilities associated with each recommended fund/appeal.
+- `priority_score`: Composite rank (40% amount, 40% timing, 20% preference certainty) used to sort the playbook.
+- `action_bucket`: Operational call-to-action derived from amount/timing thresholds (`VIP_target`, `Upgrade_push`, `Reactivation`, `Nurture`).
+- **`propensity_model_comparison`** and **`major_gift_model_comparison`**
+- Columns `model`, `auc`, `precision`, `recall`, `f1`, `support` summarise hold-out performance for Logistic Regression, Random Forest, and LightGBM classifiers.
+- Higher `auc` or `f1` indicates a stronger candidate for scoring.
+- **`field_importance_propensity`**, **`field_importance_major_gift`**, etc.
+- Each row shows a source `field` with aggregated importance across one-hot encoded levels.
+- Importances are normalised to sum to 1.0 for the underlying tree-based model; higher values indicate stronger predictive power.
+- Use these sheets to explain which donor attributes drive the scores. Fields absent from the sheet either lacked predictive signal or were unavailable in the training slice.
+
+### 4.2 RFM segmentation & lapsed donors
+- **`rfm_table`**
+- `Recency`: Days since last gift (0 indicates same-day gifts).
+- `Frequency`: Total count of recorded gifts.
+- `Monetary`: Lifetime donation amount.
+- `LastAmount`, `FirstGiftDate`, `LastGiftDate`: Sanity-check columns for donor histories.
+- `R_score`, `F_score`, `M_score`, `RFM_Score`, `RFM_Segment`: Quintile-based scores and canonical segment labels (Champion, Loyal, At Risk, etc.).
+- **`lapsed_targets`**
+- Contains donors with `Recency ≥ 365` and `Monetary ≥ 100`.
+- Shares the same numeric columns as `rfm_table`, allowing quick filtering or mail-merge exports.
+
+### 4.3 Actionable donor lists
+All actionable tabs originate from `actionable_lists.py` and share the following core columns:
+| Column                     | Meaning                                                                                                                        |
+| -------------------------  | ------------------------------------------------------------------------------------------------------------------------------ |
+| `ID`                       | Donor identifier.                                                                                                              |
+| `Recency`                  | Days since the most recent gift at the time of the run.                                                                        |
+| `Frequency`                | Total number of gifts on record.                                                                                               |
+| `Monetary`                 | Lifetime donation value.                                                                                                       |
+| `AvgAmount`                | Arithmetic mean of all gifts.                                                                                                  |
+| `LastAmount`               | Amount of the most recent gift.                                                                                                |
+| `LastGiftDate`             | Date of the most recent gift.                                                                                                  |
+| `FirstGiftDate`            | Donor’s first recorded gift date.                                                                                              |
+| `Gifts12`, `Amt12`         | Number of gifts and total amount in the most recent 365-day window.                                                            |
+| `GiftsPrev12`, `AmtPrev12` | Number of gifts and total amount in the preceding 365-day window (days 366–730 before the reference date). Values of 0 indicate no activity in that period. |
+
+Specific logic per tab:
+- `lapsed_12m`: Donors inactive for ≥12 months but historically valuable (`Monetary ≥ 100`).
+- `high_potential_sleeper`: Donors inactive for ≥12 months with stronger history (`Monetary ≥ 500`). Use `Gifts12` vs `GiftsPrev12` to spot declining engagement.
+- `upgrade_candidates`: Donors whose last gift is at least 1.5× their average gift and who made ≥2 gifts in total. Prioritise those with high `AvgAmount` and recent `LastGiftDate`.
+- `new_donors_90d`: Donors whose first gift landed within the configured `new_donor_days` (default 90). Columns `GiftsPrev12`/`AmtPrev12` are absent by design.
+ 
+### 4.4 Descriptive trend & distribution tabs
+- `trend_year` / `trend_month`: Time-series aggregates for amount, donors, and counts, including year-over-year growth metrics.
+- `dist_gender`, `dist_agegroup`, `dist_occupation`, `dist_religion`, `dist_suburb`: Category-level totals, donor counts, and averages.
+- `appeal_performance`, `fund_performance`: Campaign/fund breakdowns using the same measures as the demographic tabs.
+
+### 4.5 Relationship analytics
+- `relationship_summary`: Donation totals by relationship flag combination (e.g., Current Parent, Past Student).
+- `relationship_trend`: Yearly totals for each relationship combination, allowing you to track engagement shifts.
+ 
+### 4.6 Model metrics (`json_metrics` sheet)
+Metric JSON files saved during training are flattened here. Expect regression metrics such as `MAE`, `RMSE`, `R2`, along with classification metrics (`auc`, `precision`, `recall`). Use these values to compare runs over time.
+ 
+## 5. Understanding the predictive models
+The modelling pipeline trains multiple algorithms and automatically exports metrics and field importances:
+- **Re-donation propensity**: Logistic Regression (baseline), RandomForestClassifier, and LightGBMClassifier. Scores represent the probability of a donor giving again within the analysis window. Focus on donors with high scores but high `Recency` for reactivation opportunities.
+- **Major gift propensity**: Same algorithm roster as above, but with the target defined by `--major_threshold`. Use the resulting probabilities to build cultivation plans for major gift officers.
+- **Next gift amount**: RandomForestRegressor predicts the expected value of the next donation (`pred_amount`). Compare against `LastAmount` to find potential upgrades.
+- **Time to next gift**: Gradient boosting regressor estimates days until the next gift (`pred_days_to_next`). Negative or very small values indicate imminent gifts; large values identify lapsed risk.
+- **Preference model**: When `Fund` or `Appeal` data is dense, a multi-class classifier ranks likely destinations. Low confidence across all classes suggests messaging should emphasise general appeals.
+ 
+Feature importances are aggregated to the original field name. A field with importance 0.25 means roughly 25% of the splitting power in the tree-based model came from that column (summing to 1.0). Use this to explain why the model prioritises certain segments (e.g., `Recency`, `AvgAmount`, or relationship flags).
+
+## 6. Post-run housekeeping & troubleshooting
+- The Excel bundle auto-increments (`_v2`, `_v3`, …) to avoid overwriting earlier deliverables.
+- Source CSV, JSON, and model artefacts move into a dated `archive_YYYYMMDD` folder for traceability.
+- Use `archive_YYYYMMDD/models/` to retrieve the pickled scikit-learn pipelines if you need to score donors externally.
+ 
+Common issues:
+| `pyodbc` import error | ODBC driver missing | Install Microsoft ODBC Driver 17/18 for SQL Server and re-run `pip install -r requirements.txt`. |
+| Empty predictive sheets | Training data too small or no positive labels | Check `pipeline.log` for warnings, widen `--year_cutoff`, or ensure major-gift threshold matches your data. |
+| Missing demographic/relationship tabs | Source columns not present | Confirm the source extract includes the demographic fields before running. |
+
+With this guide you can install the environment, automate execution, and deliver the workbook with enough context for stakeholders to interpret every sheet and model output.
