@@ -698,13 +698,19 @@ class PredictivePipeline:
         p50 = np.median(residuals)
         p80 = np.quantile(residuals, 0.8)
         
+        # Convert to dates and format as date only (no time)
+        pred_date_point = (pd.to_datetime(cutoff) + pd.to_timedelta(pred_days, unit='D')).date
+        pred_date_p20 = (pd.to_datetime(cutoff) + pd.to_timedelta(pred_days + p20, unit='D')).date
+        pred_date_p50 = (pd.to_datetime(cutoff) + pd.to_timedelta(pred_days + p50, unit='D')).date
+        pred_date_p80 = (pd.to_datetime(cutoff) + pd.to_timedelta(pred_days + p80, unit='D')).date
+        
         return pd.DataFrame({
             cols.donor_id: donor_ids,
             'pred_days_to_next': pred_days,
-            'pred_date_point': pd.to_datetime(cutoff) + pd.to_timedelta(pred_days, unit='D'),
-            'pred_date_p20': pd.to_datetime(cutoff) + pd.to_timedelta(pred_days + p20, unit='D'),
-            'pred_date_p50': pd.to_datetime(cutoff) + pd.to_timedelta(pred_days + p50, unit='D'),
-            'pred_date_p80': pd.to_datetime(cutoff) + pd.to_timedelta(pred_days + p80, unit='D')
+            'pred_date_point': pred_date_point,
+            'pred_date_p20': pred_date_p20,
+            'pred_date_p50': pred_date_p50,
+            'pred_date_p80': pred_date_p80
         })
     
     def _predict_preference(self, df, model, target_name):
