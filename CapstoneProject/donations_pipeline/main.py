@@ -67,10 +67,6 @@ class DonationsPipeline:
                 processed_df = self.preprocessor.preprocess(raw_df)
                 self._export_cleaned_data(processed_df)
             
-            self.logger.info("Ensuring sklearn compatibility (converting pd.NA)...")
-            processed_df = self._ensure_sklearn_compatible(processed_df)
-            self.logger.info("Conversion complete")
-            
             # Stage 3-6: Analysis
             self._run_analysis_for_slices(processed_df)
             
@@ -150,40 +146,7 @@ class DonationsPipeline:
             with self.logger.timed_operation("[6/6] Packaging Results"):
                 self.output_manager.bundle_to_excel(self.output_dir)
                 self.output_manager.archive_intermediate_files(self.output_dir)
-    
-    def _ensure_sklearn_compatible(self, df: pd.DataFrame) -> pd.DataFrame:
-        """Convert all pd.NA to sklearn-safe types"""
-        result = df.copy()
-        
-        for col in result.columns:
-            col_dtype = result[col].dtype
-            
-            if pd.api.types.is_extension_array_dtype(col_dtype):
-                if pd.api.types.is_integer_dtype(col_dtype):
-                    result[col] = result[col].astype('float64')
-                elif pd.api.types.is_string_dtype(col_dtype):
-                    result[col] = result[col].astype('object').fillna('')
-                elif pd.api.types.is_bool_dtype(col_dtype):
-                    result[col] = result[col].astype('float64')
-                else:
-                    try:
-                        result[col] = result[col].astype('float64')
-                    except:
-                        result[col] = result[col].astype('object').fillna('')
-            
-            elif col_dtype == 'object':
-                try:
-                    mask = result[col].apply(lambda x: x is pd.NA)
-                    if mask.any():
-                        result.loc[mask, col] = ''
-                except:
-                    pass
-            
-            elif pd.api.types.is_numeric_dtype(col_dtype) and col_dtype != 'float64':
-                result[col] = result[col].astype('float64')
-        
-        return result
-    
+     
     def _run_analysis_slice(
         self, 
         df: pd.DataFrame, 

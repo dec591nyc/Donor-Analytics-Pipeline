@@ -39,8 +39,6 @@ class ColumnConfig:
 @dataclass
 class AnalysisConfig:
     """Analysis parameters"""
-    age_bins: List[int] = field(default_factory=lambda: [0, 25, 35, 45, 55, 65, 75, 200])
-    age_labels: List[str] = field(default_factory=lambda: ["<25", "25-34", "35-44", "45-54", "55-64", "65-74", "75+"])
     rfm_quantiles: List[float] = field(default_factory=lambda: [0.2, 0.4, 0.6, 0.8])
     year_cutoff: int = 2000
     redonate_window_days: int = 365

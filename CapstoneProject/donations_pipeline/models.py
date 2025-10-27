@@ -201,8 +201,8 @@ class PropensityModeler(ModelTrainer):
         else:
             # Handle the case where AUC is missing
             metrics_df = pd.DataFrame(metrics_list) if metrics_list else pd.DataFrame()
-            self.logger.warning(f"AUC column missing. Available columns: {metrics_df.columns.tolist()}")
-        metrics_df = pd.DataFrame(metrics_list).sort_values('auc', ascending=False)
+            if not metrics_df.empty:
+                self.logger.warning(f"AUC column missing or metrics list empty. Available columns: {metrics_df.columns.tolist()}")
         
         return trained_models, metrics_df
     

@@ -258,7 +258,8 @@ class FeatureEngineer:
 
         sort_cols = [c for c in [cols.donor_id, getattr(cols, "date", None)] if c]
         df_sorted = df.sort_values(sort_cols)
-        latest_demo = df_sorted.groupby(cols.donor_id).tail(1)
+        # Use drop_duplicates for better performance on large datasets
+        latest_demo = df_sorted.drop_duplicates(subset=[cols.donor_id], keep='last')
 
         # Removed Age and AgeGroup from demographic columns
         demo_cols = [
@@ -285,7 +286,10 @@ class FeatureEngineer:
         self,
         df: pd.DataFrame,
         cutoff_dates: pd.DatetimeIndex,
-        label_func: callable
+        label_func: callable,
+        *,
+        label_column_name: str = 'label',
+        label_merge_how: str = 'left'
     ) -> tuple[pd.DataFrame, pd.Series]:
         """
         Create panel dataset with multiple time periods
@@ -295,6 +299,9 @@ class FeatureEngineer:
             cutoff_dates: List of cutoff dates for feature calculation
             label_func: Function(df, cutoff_date) -> Series of labels
         
+            label_column_name: Name to use for the label column in the panel
+            label_merge_how: Merge strategy when combining labels with features
+
         Returns:
             (features_df, labels_series)
         """
@@ -317,25 +324,37 @@ class FeatureEngineer:
             labels = label_func(df, cutoff)
             donor_col = self.config.columns.donor_id
 
+            if labels is None:
+                continue
+
             if isinstance(labels, pd.Series):
+                labels = labels.rename(label_column_name).to_frame()
+            elif isinstance(labels, pd.DataFrame):
+                labels = labels.copy()
+                if label_column_name not in labels.columns and len(labels.columns) == 1:
+                    labels = labels.rename(columns={labels.columns[0]: label_column_name})
+            else:
+                raise TypeError("label_func must return a pandas Series or DataFrame")
+
+            if donor_col not in labels.columns:
                 if labels.index.name != donor_col:
                     labels.index.name = donor_col
-                if not labels.name:
-                    labels.name = 'label'
-                labels = labels.to_frame().reset_index()
+                
+                labels = labels.reset_index()
 
-            elif isinstance(labels, pd.DataFrame):
-                if donor_col not in labels.columns and labels.index.name == donor_col:
-                    labels = labels.reset_index()
+            if donor_col not in labels.columns:
+                raise ValueError("Label data must contain donor identifier column")
 
-            # Merge labels
-            feats = feats.merge(
-                labels,
-                on=self.config.columns.donor_id,
-                how='left'
-            )
-            
-            panels.append(feats)
+            merged = feats.merge(labels, on=donor_col, how=label_merge_how)
+            if merged.empty:
+                continue
+
+            if label_column_name not in merged.columns:
+                raise ValueError(
+                    f"Label column '{label_column_name}' missing after merge"
+                )
+
+            panels.append(merged)
         
         if not panels:
             raise ValueError("No valid panels created")
@@ -343,10 +362,15 @@ class FeatureEngineer:
         # Combine all panels
         panel_df = pd.concat(panels, ignore_index=True)
         
+
+        if label_column_name not in panel_df.columns:
+            raise ValueError(
+                f"Label column '{label_column_name}' not found in panel dataset"
+            )
+
         # Separate features and labels
-        label_col = labels.name if hasattr(labels, 'name') else 'label'
-        y = panel_df[label_col]
-        X = panel_df.drop(columns=[label_col])
+        y = panel_df[label_column_name]
+        X = panel_df.drop(columns=[label_column_name])
         
         self.logger.info(
             f"Created panel dataset: "

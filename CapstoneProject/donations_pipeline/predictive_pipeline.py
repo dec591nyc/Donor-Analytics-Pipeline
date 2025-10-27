@@ -78,7 +78,6 @@ class PredictivePipeline:
                 X = X_with_id.drop(columns=[self.config.columns.donor_id], errors='ignore')
                 
                 X_train, X_test, y_train, y_test = self.data_splitter.time_based_split(X, y)
-                
                 modeler = PropensityModeler(self.config, self.logger)
                 models, metrics_df = modeler.train_models(
                     X_train, X_test, y_train, y_test, cat_cols, output_dir
@@ -180,7 +179,12 @@ class PredictivePipeline:
                 X = X_with_id.drop(columns=[self.config.columns.donor_id], errors='ignore')
                 
                 X_train, X_test, y_train, y_test = self.data_splitter.time_based_split(X, y)
-                
+                if y_train.nunique() < 2:
+                    self.logger.warning(
+                        f"Preference model: Training data (y_train) has only {y_train.nunique()} unique class. "
+                        "Model cannot be trained. Skipping."
+                    )
+                    return None, None
                 classifier = PreferenceClassifier(self.config, self.logger)
                 model, metrics = classifier.train_model(
                     X_train, X_test, y_train, y_test, cat_cols, output_dir, target_name
@@ -269,7 +273,85 @@ class PredictivePipeline:
             self.logger.error(f"Playbook generation failed: {e}", exc_info=True)
     
     # ===== DATASET BUILDING METHODS =====
-    
+    def _get_redonate_labels(self, df: pd.DataFrame, cutoff: pd.Timestamp) -> pd.DataFrame:
+        """Label function for create_panel_dataset: Calculates 'ReDonate'"""
+        cols = self.config.columns
+        analysis = self.config.analysis
+        
+        window_end = cutoff + pd.Timedelta(days=analysis.redonate_window_days)
+        future = df[(df[cols.date] > cutoff) & (df[cols.date] <= window_end)]
+        
+        labels = future.groupby(cols.donor_id).size().rename('ReDonate')
+        labels = (labels > 0).astype(int)
+        
+        return labels.reset_index()
+
+    def _get_major_gift_labels(self, df: pd.DataFrame, cutoff: pd.Timestamp) -> pd.DataFrame:
+        """Generate major gift labels for panel creation."""
+        cols = self.config.columns
+        analysis = self.config.analysis
+        threshold = analysis.major_gift_threshold
+
+        window_end = cutoff + pd.Timedelta(days=analysis.redonate_window_days)
+        future = df[
+            (df[cols.date] > cutoff)
+            & (df[cols.date] <= window_end)
+            & (df[cols.amount] >= threshold)
+        ]
+
+        labels = future.groupby(cols.donor_id).size().rename('MajorGift')
+        labels = (labels > 0).astype(int)
+        return labels.reset_index()
+
+    def _get_time_labels(self, df: pd.DataFrame, cutoff: pd.Timestamp) -> pd.DataFrame:
+        """Generate time-to-next donation labels for panel creation."""
+        cols = self.config.columns
+
+        future = df[df[cols.date] > cutoff]
+        next_date = future.groupby(cols.donor_id)[cols.date].min().rename('NextGiftDate')
+
+        if next_date.empty:
+            return pd.DataFrame(columns=[cols.donor_id, 'NextGiftDate', 'DaysToNext'])
+
+        labels = next_date.to_frame().reset_index()
+        labels['DaysToNext'] = (labels['NextGiftDate'] - cutoff).dt.days
+        labels = labels[labels['DaysToNext'] > 0]
+        return labels
+
+    def _get_preference_labels(
+        self,
+        df: pd.DataFrame,
+        cutoff: pd.Timestamp,
+        target_col: str
+    ) -> pd.DataFrame:
+        """Generate preference labels (fund/appeal) for panel creation."""
+        cols = self.config.columns
+        analysis = self.config.analysis
+
+        window_end = cutoff + pd.Timedelta(days=analysis.redonate_window_days)
+        future = df[
+            (df[cols.date] > cutoff)
+            & (df[cols.date] <= window_end)
+            & (df[target_col].notna())
+        ].sort_values([cols.donor_id, cols.date])
+
+        next_pref = future.groupby(cols.donor_id)[target_col].first().rename('TargetCategory')
+        return next_pref.reset_index()
+
+
+    def _get_redonate_labels(self, df: pd.DataFrame, cutoff: pd.Timestamp) -> pd.Series:
+        cols = self.config.columns
+        analysis = self.config.analysis
+        
+        window_end = cutoff + pd.Timedelta(days=analysis.redonate_window_days)
+        future = df[(df[cols.date] > cutoff) & (df[cols.date] <= window_end)]
+        
+        labels = future.groupby(cols.donor_id).size().rename('ReDonate')
+        labels = (labels > 0).astype(int)
+
+        return labels.to_frame().reset_index()
+
+
     def _build_redonate_panel(self, df):
         """Build panel dataset for re-donation propensity"""
         cols = self.config.columns
@@ -285,28 +367,18 @@ class PredictivePipeline:
             raise ValueError("Insufficient date range for panel creation")
         
         cutoff_dates = pd.date_range(start=start_date, end=end_date, freq=analysis.panel_step)
-        
         self.logger.info(f"Building re-donation panel: {len(cutoff_dates)} cutoffs")
         
-        panels = []
-        for cutoff in cutoff_dates:
-            feats = self.feature_engineer.create_donor_features(df, cutoff)
-            feats = self.feature_engineer.add_demographic_features(feats, df)
-            feats['CutoffDate'] = cutoff
-            
-            window_end = cutoff + pd.Timedelta(days=analysis.redonate_window_days)
-            future = df[(df[cols.date] > cutoff) & (df[cols.date] <= window_end)]
-            
-            labels = future.groupby(cols.donor_id).size().rename('ReDonate')
-            labels = (labels > 0).astype(int)
-            
-            feats = feats.merge(labels.to_frame(), on=cols.donor_id, how='left').fillna({'ReDonate': 0})
-            panels.append(feats)
-        
-        panel_df = pd.concat(panels, ignore_index=True)
-        
-        y = panel_df['ReDonate'].astype(int)
-        X = panel_df.drop(columns=['ReDonate'])
+        X_with_labels, y_series = self.feature_engineer.create_panel_dataset(
+            df,
+            cutoff_dates,
+            label_func=self._get_redonate_labels,
+            label_column_name='ReDonate',
+            label_merge_how='left'
+        )
+
+        y = y_series.fillna(0).astype(int).reset_index(drop=True)
+        X = X_with_labels.reset_index(drop=True)
         
         # REMOVED: Age, AgeGroup, AgeAtDonation, AgeGroupAtDonation
         cat_cols = [
@@ -315,7 +387,6 @@ class PredictivePipeline:
             cols.current_parent, cols.past_parent, cols.past_student
         ]
         cat_cols = [c for c in cat_cols if c and c in X.columns]
-        
         self.logger.info(f"Panel created: {len(X):,} observations, {y.sum():,} positive labels ({y.mean()*100:.1f}%)")
         
         for col in X.columns:
@@ -346,26 +417,17 @@ class PredictivePipeline:
         
         self.logger.info(f"Building major gift panel: {len(cutoff_dates)} cutoffs, threshold=${threshold:,.0f}")
         
-        panels = []
-        for cutoff in cutoff_dates:
-            feats = self.feature_engineer.create_donor_features(df, cutoff)
-            feats = self.feature_engineer.add_demographic_features(feats, df)
-            feats['CutoffDate'] = cutoff
-            
-            window_end = cutoff + pd.Timedelta(days=analysis.redonate_window_days)
-            future = df[(df[cols.date] > cutoff) & (df[cols.date] <= window_end) & (df[cols.amount] >= threshold)]
-            
-            labels = future.groupby(cols.donor_id).size().rename('MajorGift')
-            labels = (labels > 0).astype(int)
-            
-            feats = feats.merge(labels.to_frame(), on=cols.donor_id, how='left').fillna({'MajorGift': 0})
-            panels.append(feats)
-        
-        panel_df = pd.concat(panels, ignore_index=True)
-        
-        y = panel_df['MajorGift'].astype(int)
-        X = panel_df.drop(columns=['MajorGift'])
-        
+        X_with_labels, y_series = self.feature_engineer.create_panel_dataset(
+            df,
+            cutoff_dates,
+            label_func=self._get_major_gift_labels,
+            label_column_name='MajorGift',
+            label_merge_how='left'
+        )
+
+        y = y_series.fillna(0).astype(int).reset_index(drop=True)
+        X = X_with_labels.reset_index(drop=True)
+
         cat_cols = [
             cols.gender, cols.occupation_desc, cols.religion,
             cols.state, cols.education,
@@ -445,32 +507,19 @@ class PredictivePipeline:
         
         self.logger.info(f"Building time dataset: {len(cutoff_dates)} cutoffs")
         
-        panels = []
-        for cutoff in cutoff_dates:
-            feats = self.feature_engineer.create_donor_features(df, cutoff)
-            feats = self.feature_engineer.add_demographic_features(feats, df)
-            feats['CutoffDate'] = cutoff
-            
-            future = df[df[cols.date] > cutoff]
-            next_date = future.groupby(cols.donor_id)[cols.date].min().rename('NextGiftDate')
-            
-            feats = feats.merge(next_date.to_frame(), on=cols.donor_id, how='inner')
-            
-            if feats.empty:
-                continue
-            
-            feats['DaysToNext'] = (feats['NextGiftDate'] - cutoff).dt.days
-            feats = feats[feats['DaysToNext'] > 0]
-            
-            panels.append(feats)
-        
-        if not panels:
+        X_with_labels, y_series = self.feature_engineer.create_panel_dataset(
+            df,
+            cutoff_dates,
+            label_func=self._get_time_labels,
+            label_column_name='DaysToNext',
+            label_merge_how='inner'
+        )
+
+        if X_with_labels.empty:
             raise ValueError("No valid observations for time dataset")
-        
-        panel_df = pd.concat(panels, ignore_index=True)
-        
-        y = panel_df['DaysToNext'].astype(float)
-        X = panel_df.drop(columns=['DaysToNext', 'NextGiftDate', cols.donor_id], errors='ignore')
+
+        y = y_series.astype(float).reset_index(drop=True)
+        X = X_with_labels.drop(columns=['NextGiftDate', cols.donor_id], errors='ignore').reset_index(drop=True)
         
         cat_cols = [
             cols.gender, cols.occupation_desc, cols.religion,
@@ -519,33 +568,23 @@ class PredictivePipeline:
         cutoff_dates = pd.date_range(start=start_date, end=end_date, freq=analysis.panel_step)
         
         self.logger.info(f"Building preference dataset for {target_name}: {len(cutoff_dates)} cutoffs")
-        
-        panels = []
-        for cutoff in cutoff_dates:
-            feats = self.feature_engineer.create_donor_features(df, cutoff)
-            feats = self.feature_engineer.add_demographic_features(feats, df)
-            feats['CutoffDate'] = cutoff
-            
-            window_end = cutoff + pd.Timedelta(days=analysis.redonate_window_days)
-            future = df[
-                (df[cols.date] > cutoff) & 
-                (df[cols.date] <= window_end) &
-                (df[target_col].notna())
-            ].sort_values([cols.donor_id, cols.date])
-            
-            next_pref = future.groupby(cols.donor_id)[target_col].first().rename('TargetCategory')
-            
-            feats = feats.merge(next_pref.to_frame(), on=cols.donor_id, how='inner')
-            panels.append(feats)
-        
-        if not panels:
+
+        X_with_labels, y_series = self.feature_engineer.create_panel_dataset(
+            df,
+            cutoff_dates,
+            label_func=lambda data, cutoff: self._get_preference_labels(data, cutoff, target_col),
+            label_column_name='TargetCategory',
+            label_merge_how='inner'
+        )
+
+        if X_with_labels.empty:
             raise ValueError("No valid observations for preference dataset")
-        
-        panel_df = pd.concat(panels, ignore_index=True)
-        panel_df = panel_df.dropna(subset=['TargetCategory'])
-        
-        y = panel_df['TargetCategory'].astype(str)
-        X = panel_df.drop(columns=['TargetCategory', cols.donor_id], errors='ignore')
+
+        y = y_series.dropna().astype(str)
+        valid_index = y.index
+        X = X_with_labels.loc[valid_index].drop(columns=[cols.donor_id], errors='ignore')
+        X = X.reset_index(drop=True)
+        y = y.reset_index(drop=True)
         
         cat_cols = [
             cols.gender, cols.occupation_desc, cols.religion,
@@ -573,37 +612,37 @@ class PredictivePipeline:
         cols = self.config.columns
         cutoff = df[cols.date].max()
         
-        print("\n" + "="*80)
-        print("DEBUG: _predict_amounts")
-        print("="*80)
+        self.logger.debug("\n" + "="*80)
+        self.logger.debug("DEBUG: _predict_amounts")
+        self.logger.debug("="*80)
         
         # Step 1: Create features
         feats = self.feature_engineer.create_donor_features(df, cutoff)
-        print(f"\nAfter create_donor_features:")
-        print(f"   Columns: {feats.columns.tolist()}")
-        print(f"   Dtypes:\n{feats.dtypes}")
+        self.logger.debug("\nAfter create_donor_features:")
+        self.logger.debug("   Columns: {feats.columns.tolist()}")
+        self.logger.debug("   Dtypes:\n{feats.dtypes}")
     
         # Check for pd.NA
         for col in feats.columns:
             try:
                 has_pd_na = feats[col].apply(lambda x: x is pd.NA).any()
                 if has_pd_na:
-                    print(f"   ⚠️  Column '{col}' has pd.NA!")
+                    self.logger.debug("   ⚠️  Column '{col}' has pd.NA!")
             except:
                 pass
             
         # Step 2: Add demographics
         feats = self.feature_engineer.add_demographic_features(feats, df)
-        print(f"\nAfter add_demographic_features:")
-        print(f"   Columns: {feats.columns.tolist()}")
-        print(f"   Dtypes:\n{feats.dtypes}")
+        self.logger.debug("\nAfter add_demographic_features:")
+        self.logger.debug("   Columns: {feats.columns.tolist()}")
+        self.logger.debug("   Dtypes:\n{feats.dtypes}")
     
         # Check for pd.NA again
         for col in feats.columns:
             try:
                 has_pd_na = feats[col].apply(lambda x: x is pd.NA).any()
                 if has_pd_na:
-                    print(f"   ⚠️  Column '{col}' has pd.NA!")
+                    self.logger.debug("   ⚠️  Column '{col}' has pd.NA!")
             except:
                 pass
         
@@ -612,20 +651,20 @@ class PredictivePipeline:
         # Step 3: Drop donor_id
         # Drop ALL non-feature columns (donor_id only, no date columns)
         X = feats.drop(columns=[cols.donor_id], errors='ignore')
-        print(f"\nAfter dropping donor_id:")
-        print(f"   Shape: {X.shape}")
-        print(f"   Columns: {X.columns.tolist()}")
-        print(f"   Dtypes:\n{X.dtypes}")
+        self.logger.debug("\nAfter dropping donor_id:")
+        self.logger.debug("   Shape: {X.shape}")
+        self.logger.debug("   Columns: {X.columns.tolist()}")
+        self.logger.debug("   Dtypes:\n{X.dtypes}")
 
         # Check for pd.NA again
         for col in X.columns:
             try:
                 has_pd_na = X[col].apply(lambda x: x is pd.NA).any()
                 if has_pd_na:
-                    print(f"   ⚠️  Column '{col}' has pd.NA!")
+                    self.logger.debug("   ⚠️  Column '{col}' has pd.NA!")
                     # Show sample
                     sample = X[col].head(20)
-                    print(f"      Sample: {sample.tolist()}")
+                    self.logger.debug("      Sample: {sample.tolist()}")
             except:
                 pass
 
@@ -634,47 +673,47 @@ class PredictivePipeline:
 
         X = self._convert_na_to_nan(X)
         
-        print(f"\nAfter _convert_na_to_nan:")
-        print(f"   Dtypes:\n{X.dtypes}")
+        self.logger.debug("\nAfter _convert_na_to_nan:")
+        self.logger.debug("   Dtypes:\n{X.dtypes}")
         
         # Final check
         for col in X.columns:
             try:
                 has_pd_na = X[col].apply(lambda x: x is pd.NA).any()
                 if has_pd_na:
-                    print(f"   🔴 ERROR: Column '{col}' STILL has pd.NA!")
-                    print(f"      Before conversion: {X_before[col].head(10).tolist()}")
-                    print(f"      After conversion: {X[col].head(10).tolist()}")
+                    self.logger.debug("   🔴 ERROR: Column '{col}' STILL has pd.NA!")
+                    self.logger.debug("      Before conversion: {X_before[col].head(10).tolist()}")
+                    self.logger.debug("      After conversion: {X[col].head(10).tolist()}")
             except:
                 pass
     
         # Try sklearn test
-        print(f"\nTesting sklearn compatibility:")
+        self.logger.debug("\nTesting sklearn compatibility:")
         try:
             for col in X.columns:
                 if X[col].dtype == 'object':
                     _ = X[col] != X[col]
-            print(f"   PASSED!")
+            self.logger.debug("   PASSED!")
         except TypeError as e:
-            print(f"   ❌ FAILED: {e}")
-            print("\n   Checking which column failed...")
+            self.logger.debug("   ❌ FAILED: {e}")
+            self.logger.debug("\n   Checking which column failed...")
             for col in X.columns:
                 if X[col].dtype == 'object':
                     try:
                         _ = X[col] != X[col]
                     except TypeError:
-                        print(f"      🔴 Column '{col}' failed the test!")
-                        print(f"         Sample values: {X[col].head(20).tolist()}")
+                        self.logger.debug("      🔴 Column '{col}' failed the test!")
+                        self.logger.debug("         Sample values: {X[col].head(20).tolist()}")
         
-        print("\nCalling model.predict...")
+        self.logger.debug("\nCalling model.predict...")
         try:
             predictions = model.predict(X)
-            print(f"   SUCCESS!")
+            self.logger.debug("   SUCCESS!")
         except Exception as e:
-            print(f"   ❌ FAILED: {e}")
+            self.logger.debug("   ❌ FAILED: {e}")
             raise
         
-        print("="*80 + "\n")
+        self.logger.debug("="*80 + "\n")
         
         return pd.DataFrame({
             cols.donor_id: donor_ids,
