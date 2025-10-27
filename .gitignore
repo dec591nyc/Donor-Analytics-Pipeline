@@ -8,3 +8,4 @@ AdvancedBusinessCourse
 *.pkl
 /Data/Output/
 CapstoneProject/donations_pipeline/.env
+CapstoneProject/Data/Output/IDR_v1/since_2000

@@ -1,8 +1,0 @@
-{
-  "model": "LightGBM",
-  "target": "fund",
-  "macro_f1": 0.2824773464025549,
-  "weighted_f1": 0.5892871438903047,
-  "accuracy": 0.5951450892857143,
-  "n_classes": 6
-}
