@@ -57,6 +57,28 @@ class DescriptiveAnalyzer:
                 f"total ${trend_year['total_amount'].sum():,.0f}"
             )
         
+            amount_col = self.config.columns.amount
+            major_threshold = self.config.analysis.major_gift_threshold
+
+            if amount_col in df.columns:
+                major_mask = df[amount_col] >= major_threshold
+
+                if major_mask.any():
+                    major_trend_year = self._create_yearly_trend(df.loc[major_mask])
+                    results['trend_year_major.csv'] = major_trend_year
+
+                    self.logger.info(
+                        "Major gift yearly trend: "
+                        f"{len(major_trend_year)} years, "
+                        f"total ${major_trend_year['total_amount'].sum():,.0f} "
+                        f"(>=${major_threshold:,.0f})"
+                    )
+                else:
+                    self.logger.info(
+                        "Major gift yearly trend: no donations "
+                        f">=${major_threshold:,.0f}"
+                    )
+        
         # Monthly trends
         if 'MonthPeriod' in df.columns:
             trend_month = self._create_monthly_trend(df)

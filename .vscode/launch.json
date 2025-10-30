@@ -16,17 +16,7 @@
         "--excel_name", "Donations_DataModellingResult.xlsx",
         "--window_days", "365",
         "--year_cutoff", "2000",
-        "--major_threshold", "1000",
-        // Email Settings
-        "--email_enabled", "false",
-        "--email_to", "nieyy007@mymail.unisa.edu.au",
-        "--email_cc", "",
-        "--email_from", "donations-pipeline@mymail.unisa.edu.au",
-        
-        // SMTP settings
-        "--smtp_server", "smtp.office365.com",
-        "--smtp_port", "587",
-        "--smtp_username", "automated_pipeline17N9@outlook.com"
+        "--major_threshold", "1000"
       ]
     }
   ]

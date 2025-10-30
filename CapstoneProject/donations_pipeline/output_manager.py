@@ -153,6 +153,7 @@ class OutputManager:
             "relationship_agegroup.csv",
             "relationship_trend.csv",
             "trend_year.csv",
+            "trend_year_major.csv",
             "trend_month.csv",
             "dist_gender.csv",
             "dist_agegroup.csv",

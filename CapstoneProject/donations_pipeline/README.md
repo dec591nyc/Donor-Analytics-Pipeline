@@ -26,9 +26,6 @@ The pipeline performs the following end-to-end steps:
 ### 2.2 External dependencies
 - **SQL Server connectivity** (optional): install the Microsoft ODBC Driver 17 or 18 for SQL Server. On Windows, this is available through the official MSI installer; on Linux, install `unixODBC` plus the Microsoft driver package.
 
-### 2.3 Environment variables and secrets
-Store any sensitive values in a `.env` file located alongside `main.py`. The loader automatically reads keys such as `SQLSERVER_USER`, `SQLSERVER_PASSWORD`, `SMTP_USERNAME`, and `SMTP_PASSWORD`.
-
 ## 3. Running the pipeline
 ### 3.1 Command-line (CSV extract)
 ```bash

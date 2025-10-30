@@ -235,7 +235,6 @@ class DataLoader:
             ORDER BY a.ID ASC, a.Date ASC
         """
 
-
 class DataValidator:
     """Validates loaded data meets minimum requirements"""
     
