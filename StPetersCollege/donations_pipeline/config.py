@@ -9,8 +9,6 @@ from dataclasses import dataclass, field
 from typing import Optional, List
 from pathlib import Path
 import pandas as pd
-from .env_loader import EnvLoader
-
 
 @dataclass
 class ColumnConfig:
@@ -107,20 +105,6 @@ class SQLConfig:
 
 
 @dataclass
-class EmailConfig:
-    """Email notification configuration"""
-    enabled: bool = False
-    smtp_server: str = "smtp.office365.com"
-    smtp_port: int = 587
-    use_tls: bool = True
-    smtp_username: str = ""
-    smtp_password: str = ""
-    from_address: str = ""
-    to_addresses: List[str] = field(default_factory=list)
-    cc_addresses: List[str] = field(default_factory=list)
-
-
-@dataclass
 class Config:
     """Master configuration object"""
     # Paths
@@ -134,7 +118,6 @@ class Config:
     analysis: AnalysisConfig = field(default_factory=AnalysisConfig)
     models: ModelConfig = field(default_factory=ModelConfig)
     sql: SQLConfig = field(default_factory=SQLConfig)
-    email: EmailConfig = field(default_factory=EmailConfig)
     
     @property
     def output_path(self) -> Path:
@@ -167,65 +150,5 @@ class Config:
             config.sql.database = args.sql_db
             config.sql.trusted_connection = args.sql_trusted.lower() == 'true'
             config.sql.odbc_driver = args.sql_odbc_driver
-        
-        # ===== Email Configuration =====
-        # Priority: 1) Command line args, 2) Environment variables, 3) Defaults
-        
-        # Email enabled
-        if hasattr(args, 'email_enabled') and args.email_enabled:
-            config.email.enabled = args.email_enabled.lower() == 'true'
-        else:
-            config.email.enabled = EnvLoader.get_env('EMAIL_ENABLED', 'false').lower() == 'true'
-        
-        # TO addresses
-        if hasattr(args, 'email_to') and args.email_to:
-            config.email.to_addresses = [e.strip() for e in args.email_to.split(',') if e.strip()]
-        else:
-            email_to = EnvLoader.get_env('EMAIL_TO', '')
-            if email_to:
-                config.email.to_addresses = [e.strip() for e in email_to.split(',') if e.strip()]
-        
-        # CC addresses
-        if hasattr(args, 'email_cc') and args.email_cc:
-            if isinstance(args.email_cc, list):
-                config.email.cc_addresses = [
-                    e.strip() 
-                    for sublist in args.email_cc 
-                    for e in (sublist.split(',') if sublist else []) 
-                    if e.strip()
-                ]
-            else:
-                config.email.cc_addresses = [e.strip() for e in args.email_cc.split(',') if e.strip()]
-        else:
-            email_cc = EnvLoader.get_env('EMAIL_CC', '')
-            if email_cc:
-                config.email.cc_addresses = [e.strip() for e in email_cc.split(',') if e.strip()]
-        
-        # From address
-        if hasattr(args, 'email_from') and args.email_from:
-            config.email.from_address = args.email_from
-        else:
-            config.email.from_address = EnvLoader.get_env('EMAIL_FROM', '')
-        
-        # SMTP server
-        if hasattr(args, 'smtp_server') and args.smtp_server:
-            config.email.smtp_server = args.smtp_server
-        else:
-            config.email.smtp_server = EnvLoader.get_env('SMTP_SERVER', 'smtp.office365.com')
-        
-        # SMTP port
-        if hasattr(args, 'smtp_port') and args.smtp_port:
-            config.email.smtp_port = int(args.smtp_port)
-        else:
-            config.email.smtp_port = int(EnvLoader.get_env('SMTP_PORT', '587'))
-        
-        # SMTP username
-        if hasattr(args, 'smtp_username') and args.smtp_username:
-            config.email.smtp_username = args.smtp_username
-        else:
-            config.email.smtp_username = EnvLoader.get_env('SMTP_USERNAME', '')
-        
-        # SMTP password (ALWAYS from .env for security!)
-        config.email.smtp_password = EnvLoader.get_env('SMTP_PASSWORD', '')
         
         return config

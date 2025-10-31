@@ -22,8 +22,6 @@ from donations_pipeline.descriptive_analytics import DescriptiveAnalyzer
 from donations_pipeline.actionable_lists import ActionableListGenerator
 from donations_pipeline.predictive_pipeline import PredictivePipeline
 from donations_pipeline.output_manager import OutputManager
-from donations_pipeline.email_sender import EmailSender
-from donations_pipeline.env_loader import EnvLoader
 
 warnings.filterwarnings('ignore', category=FutureWarning)
 
@@ -46,12 +44,6 @@ class DonationsPipeline:
         self.validator = DataValidator(config, self.logger)
         self.preprocessor = DataPreprocessor(config, self.logger)
         self.output_manager = OutputManager(config, self.logger)
-        self.email_sender = EmailSender(config, self.logger)
-        
-        # Track success/failure
-        self.pipeline_success = False
-        self.error_message = None
-        self.output_dir = None
     
     def run(self) -> None:
         """Execute the complete analytics pipeline"""
@@ -74,51 +66,14 @@ class DonationsPipeline:
             timing_report_path = self.config.output_path / "pipeline_timing.txt"
             self.logger.save_timing_report(timing_report_path)
             
-            # Mark as successful
-            self.pipeline_success = True
-            
             self.logger.info("="*80)
             self.logger.info("Pipeline completed successfully!")
             self.logger.info(f"Results saved to: {self.config.output_path}")
             self.logger.info("="*80)
             
         except Exception as e:
-            self.pipeline_success = False
-            self.error_message = f"{str(e)}\n\n{traceback.format_exc()}"
             self.logger.error(f"Pipeline failed: {e}", exc_info=True)
             raise
-        
-        finally:
-            pass
-            # Stage 7: Send email notification (always execute)
-            # self._send_notification()
-    
-    def _send_notification(self) -> None:
-        """Send email notification about pipeline completion"""
-        try:
-            with self.logger.timed_operation("[7/6] Sending Email Notification"):
-                # Read timing report
-                timing_report_path = self.config.output_path / "pipeline_timing.txt"
-                timing_report = ""
-                
-                if timing_report_path.exists():
-                    with open(timing_report_path, 'r', encoding='utf-8') as f:
-                        timing_report = f.read()
-                
-                # Determine output directory
-                if self.output_dir is None:
-                    self.output_dir = self.config.output_path / f"since_{self.config.analysis.year_cutoff}"
-                
-                # Send email
-                self.email_sender.send_completion_email(
-                    success=self.pipeline_success,
-                    output_dir=self.output_dir,
-                    timing_report=timing_report,
-                    error_message=self.error_message
-                )
-        
-        except Exception as e:
-            self.logger.error(f"Failed to send notification email: {e}", exc_info=True)
     
     def _export_cleaned_data(self, df: pd.DataFrame) -> None:
         """Export cleaned dataset"""
@@ -282,64 +237,12 @@ def parse_arguments() -> argparse.Namespace:
         help="ODBC driver name"
     )
     
-    # Email parameters
-    parser.add_argument(
-        "--email_enabled",
-        type=str,
-        default="false",
-        choices=["true", "false"],
-        help="Enable email notifications"
-    )
-    
-    parser.add_argument(
-        "--email_to",
-        default="",
-        help="Comma-separated TO addresses"
-    )
-    
-    parser.add_argument(
-        "--email_cc",
-        default=None,
-        nargs='*',  # Accepts zero or more arguments
-        help="Comma-separated CC addresses (optional)"
-    )
-    
-    parser.add_argument(
-        "--email_from",
-        default="",
-        help="From email address"
-    )
-    
-    parser.add_argument(
-        "--smtp_server",
-        default="smtp.office365.com",
-        help="SMTP server address"
-    )
-    
-    parser.add_argument(
-        "--smtp_port",
-        type=int,
-        default=587,
-        help="SMTP server port"
-    )
-    
-    parser.add_argument(
-        "--smtp_username",
-        default="",
-        help="SMTP username"
-    )
-    
-    # Note: Password should NOT be in args, only in .env
-    
     return parser.parse_args()
 
 
 def main():
     """Main entry point"""
-    try:
-        # Load environment variables first
-        EnvLoader.load_env_file()
-        
+    try:        
         # Parse arguments
         args = parse_arguments()
         
