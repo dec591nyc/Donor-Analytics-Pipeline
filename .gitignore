@@ -1,4 +1,4 @@
-﻿CapstoneProject/donations_pipeline_GPT
+﻿StPetersCollege/donations_pipeline_GPT
 Data/Output/IDR_v1/since_2000/archive_20251014
 test.py
 DataMiningCourse
@@ -7,6 +7,6 @@ AdvancedBusinessCourse
 /Data/Output/IDR_v1/since_2000/archive_20251016_2
 *.pkl
 /Data/Output/
-CapstoneProject/donations_pipeline/.env
-CapstoneProject/Data/Output/IDR_v1/since_2000
-CapstoneProject/Data
+StPetersCollege/donations_pipeline/.env
+StPetersCollege/Data/Output/IDR_v1/since_2000
+StPetersCollege/Data
