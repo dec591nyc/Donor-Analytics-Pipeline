@@ -40,7 +40,7 @@ python -m donations_pipeline.main ^
  ```bash
 python -m donations_pipeline.main ^
     --use_sql true ^
-    --sql_server "SPKSDB02" ^
+    --sql_server "SPK***02" ^
     --sql_db "UniSA_DonorAnalysis" ^
     --window_days 365 ^
     --major_threshold 1000 ^
