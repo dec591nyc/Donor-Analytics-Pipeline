@@ -1,6 +1,6 @@
 @echo off
 REM ===========================================================
-REM  St Peter's College – Donations Analytics Pipeline (v5)
+REM  SA Private School – Donations Analytics Pipeline (v5)
 REM  Author: Yichi Nien (Ethan)
 REM  Date:   14-10-2025
 REM ===========================================================
@@ -11,7 +11,7 @@ cd /d "C:\Users\sysuni01\Documents\Python"
 REM === Run the pipeline (module form) ===
 python -m donations_pipeline.main ^
   --use_sql true ^
-  --sql_server "SPKSDB02" ^
+  --sql_server "SP****02" ^
   --sql_db "UniSA_DonorAnalysis" ^
   --input_file "C:\Users\sysuni01\Documents\Python\Data\Input\FullDataTable.csv" ^
   --out_dir "C:\Users\sysuni01\Documents\Python\Data\Output\IDR_v1" ^
